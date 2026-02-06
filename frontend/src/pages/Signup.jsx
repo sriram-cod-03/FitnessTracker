@@ -18,42 +18,39 @@ const Signup = () => {
     type: "error",
   });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const res = await api.post("/auth/signup", {
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        password: password.trim(),
-      });
+  try {
+    await api.post("/auth/signup", {
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      password: password.trim(),
+    });
 
-      // save token
-      localStorage.setItem("token", res.data.token);
+    setToast({
+      show: true,
+      message: "Account created successfully 🎉",
+      type: "success",
+    });
 
-      setToast({
-        show: true,
-        message: "Account created successfully 🎉",
-        type: "success",
-      });
+    // go to login instead of saving token
+    setTimeout(() => {
+      navigate("/login");
+    }, 1200);
+  } catch (err) {
+    setToast({
+      show: true,
+      message:
+        err.response?.data?.message || "Signup failed",
+      type: "error",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
-      // go to setup profile
-      setTimeout(() => {
-        navigate("/setup-profile");
-      }, 1500);
-    } catch (err) {
-      setToast({
-        show: true,
-        message:
-          err.response?.data?.message ||
-          "Signup failed",
-        type: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <AuthCard
