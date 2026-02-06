@@ -1,0 +1,92 @@
+/* Background */
+.auth-bg {
+  min-height: 100vh;
+  background-image:
+    linear-gradient(
+      rgba(0, 0, 0, 0.65),
+      rgba(0, 0, 0, 0.65)
+    ),
+    url("../assets/loginbg.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+/* Card */
+.auth-card {
+  width: 360px;
+  background: #121212;
+  color: #fff;
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+/* Glow on hover */
+.auth-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 0 18px rgba(0, 255, 195, 0.6),
+              0 0 40px rgba(0, 255, 195, 0.25);
+}
+/* Inputs */
+.auth-card .form-control {
+  background: #1e1e1e;
+  border: 1px solid #333;
+  color: #fff;
+}
+.auth-card .form-control:focus {
+  border-color: #00ffc3;
+  box-shadow: 0 0 6px rgba(0, 255, 195, 0.6);
+}
+/* Button */
+.auth-btn {
+  background: linear-gradient(135deg, #00ffc3, #00bcd4);
+  border: none;
+  font-weight: 600;
+  color: #000;
+}
+.auth-btn:hover {
+  opacity: 0.95;
+}
+/* Links */
+.auth-link {
+  color: #00ffc3;
+  text-decoration: none;
+}
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+/* Placeholder text color - dark mode fix */
+.auth-card input::placeholder {
+  color: #bbbbbb; /* light white-grey */
+  opacity: 1;     /* important for Firefox */
+}
+
+/* For better browser support */
+.auth-card input::-webkit-input-placeholder {
+  color: #bbbbbb;
+}
+
+.auth-card input:-ms-input-placeholder {
+  color: #bbbbbb;
+}
+/* Password eye icon */
+.password-wrapper {
+  position: relative;
+}
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #bbbbbb;
+  font-size: 14px;
+  user-select: none;
+}
+.password-toggle:hover {
+  color: #00ffc3;
+}

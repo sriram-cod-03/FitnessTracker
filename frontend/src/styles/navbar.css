@@ -1,0 +1,29 @@
+/* 🌑 Dark Navbar */
+.navbar-dark {
+  background-color: #0d1117; /* full dark */
+  color: #ffffff;
+  padding: 12px 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border-bottom: 1px solid #1f2937;
+}
+
+/* Title */
+.nav-title {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* Right buttons */
+.nav-right {
+  display: flex;
+  gap: 10px;
+}
+
+/* Buttons hover */
+.nav-right button {
+  font-size: 13px;
+}

@@ -1,0 +1,33 @@
+.setup-bg {
+  min-height: 100vh;
+  background-image: url("/src/assets/loginbg.jpg"); /* your image */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Dark overlay for readability */
+.setup-overlay {
+  background: rgba(0, 0, 0, 0.65);
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Card */
+.setup-card {
+  background-color: #111;
+  color: #fff;
+  width: 100%;
+  max-width: 420px;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+}

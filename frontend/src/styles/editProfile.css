@@ -1,0 +1,78 @@
+/* 🌑 Background */
+.edit-profile-bg {
+  min-height: calc(100vh - 60px);
+  background: #0d1117;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Card */
+.edit-profile-card {
+  width: 100%;
+  max-width: 620px;
+  background: #161b22;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+}
+
+/* Title */
+.edit-title {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+/* Form */
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Two-column rows */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* Inputs & selects */
+.form-row input,
+.form-row select {
+  background: #0d1117;
+  border: 1px solid #2a2f36;
+  color: #fff;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.form-row input::placeholder {
+  color: #9ca3af;
+}
+
+/* Save button */
+.save-btn {
+  margin-top: 10px;
+  background: #16a34a;
+  border: none;
+  padding: 14px;
+  border-radius: 10px;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background: #15803d;
+}
+
+/* 📱 Mobile */
+@media (max-width: 600px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
