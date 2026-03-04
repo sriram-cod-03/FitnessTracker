@@ -1,0 +1,35 @@
+/* PASSWORD WRAPPER */
+.password-wrapper {
+  position: relative;
+}
+
+/* INPUT PADDING FOR ICON SPACE */
+.password-input {
+  padding-right: 45px;
+}
+
+/* CUSTOM TOGGLE BUTTON */
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* 🔥 REMOVE BROWSER DEFAULT PASSWORD ICONS */
+
+/* Microsoft Edge */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+/* Chrome / Edge Chromium */
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-password-toggle-button {
+  display: none !important;
+}

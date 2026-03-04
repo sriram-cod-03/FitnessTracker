@@ -4,6 +4,7 @@ import api from "../services/api";
 import AuthCard from "../components/AuthCard";
 import ToastMessage from "../components/ToastMessage";
 import FullScreenLoader from "../components/FullScreenLoader";
+import "../styles/login.css";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -40,7 +41,6 @@ const Login = () => {
         password: password.trim(),
       });
 
-      // SAVE TOKEN
       localStorage.setItem("token", res.data.token);
 
       setToast({
@@ -49,7 +49,6 @@ const Login = () => {
         type: "success",
       });
 
-      // REDIRECT AFTER SHORT DELAY
       setTimeout(() => {
         navigate("/dashboard");
       }, 1200);
@@ -64,7 +63,6 @@ const Login = () => {
     }
   };
 
-  /* FULL SCREEN LOADER */
   if (loading) {
     return (
       <FullScreenLoader
@@ -76,7 +74,6 @@ const Login = () => {
 
   return (
     <>
-      {/* TOAST */}
       {toast.show && (
         <ToastMessage
           message={toast.message}
@@ -115,22 +112,25 @@ const Login = () => {
             <input
               type={showPassword ? "text" : "password"}
               name="password"
-              className="form-control"
+              className="form-control password-input"
               placeholder="Password"
               value={password}
               onChange={handleChange}
               required
             />
-            <span
+
+            <button
+              type="button"
               className="password-toggle"
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? "🙈" : "👁️"}
-            </span>
+            </button>
           </div>
 
           {/* LOGIN BUTTON */}
           <button
+            type="submit"
             className="btn auth-btn w-100"
             disabled={!email || !password}
           >
