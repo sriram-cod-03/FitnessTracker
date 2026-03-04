@@ -42,11 +42,7 @@ const Dashboard = () => {
         setStats(profileRes.data);
 
         // username from profile
-        setUsername(
-          profileRes.data.name ||
-          profileRes.data.username ||
-          "User"
-        );
+        setUsername(profileRes.data.name || profileRes.data.username || "User");
 
         try {
           const foodRes = await api.get("/foods/today");
@@ -55,7 +51,6 @@ const Dashboard = () => {
           console.error("Food fetch failed", err);
           setFoods([]);
         }
-
       } catch (err) {
         console.error("Dashboard load failed", err);
         localStorage.removeItem("token");
@@ -91,41 +86,18 @@ const Dashboard = () => {
       <Navbar />
 
       {/* USERNAME OUTSIDE NAVBAR */}
-      <div className="welcome-user">
-        Hello, {username} 👋
-      </div>
+      <div className="welcome-user">Hello, {username} 👋</div>
 
       <div className="dashboard-bg">
         <div className="dashboard-container text-white">
-
           {/* HEADER */}
           <div className="dashboard-header">
-
             <h2 className="dashboard-title">Dashboard</h2>
-
-            <div className="header-buttons">
-
-              <button
-                className="diet-btn"
-                onClick={() => navigate("/diet-plan")}
-              >
-                🥗 Diet Plan
-              </button>
-
-              <button
-                className="edit-btn"
-                onClick={() => navigate("/edit-profile")}
-              >
-                ✏️ Edit Profile
-              </button>
-
-            </div>
           </div>
 
           {/* STATS + SMART MESSAGE */}
 
           <div className="stats-grid">
-
             <div className="card">
               <h4>🎯 Body Stats</h4>
 
@@ -138,21 +110,17 @@ const Dashboard = () => {
             </div>
 
             <div className="card smart">
-
               <SmartMessages
                 remainingCalories={stats.calories - totalCalories}
                 remainingProtein={stats.protein - totalProtein}
                 remainingFiber={stats.fiber - totalFiber}
               />
-
             </div>
-
           </div>
 
           {/* DAILY PROGRESS */}
 
           <div className="card">
-
             <h4>📊 Daily Progress</h4>
 
             <ProgressBar
@@ -189,7 +157,6 @@ const Dashboard = () => {
               target={stats.fiber}
               unit="g"
             />
-
           </div>
 
           {/* ADD FOOD */}
@@ -209,7 +176,6 @@ const Dashboard = () => {
           <div className="card">
             <WaterTracker />
           </div>
-
         </div>
       </div>
     </>
