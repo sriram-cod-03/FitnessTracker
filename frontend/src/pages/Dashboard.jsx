@@ -8,15 +8,14 @@ import FoodList from "../components/FoodList";
 import SmartMessages from "../components/SmartMessage";
 import ProgressBar from "../components/ProgressBar";
 import FullScreenLoader from "../components/FullScreenLoader";
-
 import "../styles/dashboard.css";
 
 const Dashboard = () => {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
+  const [username, setUsername] = useState("");
 
-  // PROFILE STATS
   const [stats, setStats] = useState({
     bmr: 0,
     tdee: 0,
@@ -26,19 +25,15 @@ const Dashboard = () => {
     fiber: 0,
   });
 
-  // TODAY FOODS
   const [foods, setFoods] = useState([]);
 
-  /* ===============================
-     LOAD DASHBOARD DATA
-  ================================= */
+  /* LOAD DASHBOARD DATA */
+
   useEffect(() => {
     const loadDashboard = async () => {
       try {
-        // PROFILE
         const profileRes = await api.get("/profile");
 
-        // If profile not created yet → setup profile
         if (!profileRes.data) {
           navigate("/setup-profile");
           return;
@@ -46,7 +41,13 @@ const Dashboard = () => {
 
         setStats(profileRes.data);
 
-        // TODAY FOODS
+        // username from profile
+        setUsername(
+          profileRes.data.name ||
+          profileRes.data.username ||
+          "User"
+        );
+
         try {
           const foodRes = await api.get("/foods/today");
           setFoods(Array.isArray(foodRes.data) ? foodRes.data : []);
@@ -54,6 +55,7 @@ const Dashboard = () => {
           console.error("Food fetch failed", err);
           setFoods([]);
         }
+
       } catch (err) {
         console.error("Dashboard load failed", err);
         localStorage.removeItem("token");
@@ -66,18 +68,14 @@ const Dashboard = () => {
     loadDashboard();
   }, [navigate]);
 
-  /* ===============================
-     DAILY TOTALS
-  ================================= */
+  /* DAILY TOTALS */
+
   const totalCalories = foods.reduce((sum, f) => sum + (f.calories || 0), 0);
   const totalProtein = foods.reduce((sum, f) => sum + (f.protein || 0), 0);
   const totalCarbs = foods.reduce((sum, f) => sum + (f.carbs || 0), 0);
   const totalFats = foods.reduce((sum, f) => sum + (f.fats || 0), 0);
   const totalFiber = foods.reduce((sum, f) => sum + (f.fiber || 0), 0);
 
-  /* ===============================
-     FULL SCREEN LOADER
-  ================================= */
   if (loading) {
     return (
       <FullScreenLoader
@@ -89,90 +87,72 @@ const Dashboard = () => {
 
   return (
     <>
+      {/* NAVBAR */}
       <Navbar />
+
+      {/* USERNAME OUTSIDE NAVBAR */}
+      <div className="welcome-user">
+        Hello, {username} 👋
+      </div>
 
       <div className="dashboard-bg">
         <div className="dashboard-container text-white">
+
           {/* HEADER */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "20px",
-              gap: "10px",
-            }}
-          >
+          <div className="dashboard-header">
+
             <h2 className="dashboard-title">Dashboard</h2>
 
-            <div style={{ display: "flex", gap: "10px" }}>
-              {/* DIET PLAN BUTTON */}
+            <div className="header-buttons">
+
               <button
+                className="diet-btn"
                 onClick={() => navigate("/diet-plan")}
-                style={{
-                  background: "#ffcc00",
-                  border: "none",
-                  padding: "8px 14px",
-                  borderRadius: "8px",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                }}
               >
                 🥗 Diet Plan
               </button>
 
-              {/* EDIT PROFILE BUTTON */}
               <button
+                className="edit-btn"
                 onClick={() => navigate("/edit-profile")}
-                style={{
-                  background: "#00ffcc",
-                  border: "none",
-                  padding: "8px 14px",
-                  borderRadius: "8px",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                }}
               >
                 ✏️ Edit Profile
               </button>
+
             </div>
           </div>
 
           {/* STATS + SMART MESSAGE */}
+
           <div className="stats-grid">
-            <div className="card text-white">
+
+            <div className="card">
               <h4>🎯 Body Stats</h4>
-              <p className="stat">
-                BMR: <span>{stats.bmr}</span>
-              </p>
-              <p className="stat">
-                TDEE: <span>{stats.tdee}</span>
-              </p>
-              <p className="stat">
-                Calories: <span>{stats.calories}</span>
-              </p>
-              <p className="stat">
-                Protein: <span>{stats.protein} g</span>
-              </p>
-              <p className="stat">
-                Carbs: <span>{stats.carbs} g</span>
-              </p>
-              <p className="stat">
-                Fiber: <span>{stats.fiber} g</span>
-              </p>
+
+              <p>BMR: {stats.bmr}</p>
+              <p>TDEE: {stats.tdee}</p>
+              <p>Calories: {stats.calories}</p>
+              <p>Protein: {stats.protein} g</p>
+              <p>Carbs: {stats.carbs} g</p>
+              <p>Fiber: {stats.fiber} g</p>
             </div>
 
-            <div className="card smart text-white">
+            <div className="card smart">
+
               <SmartMessages
                 remainingCalories={stats.calories - totalCalories}
                 remainingProtein={stats.protein - totalProtein}
                 remainingFiber={stats.fiber - totalFiber}
               />
+
             </div>
+
           </div>
 
           {/* DAILY PROGRESS */}
-          <div className="card text-white">
+
+          <div className="card">
+
             <h4>📊 Daily Progress</h4>
 
             <ProgressBar
@@ -209,21 +189,27 @@ const Dashboard = () => {
               target={stats.fiber}
               unit="g"
             />
+
           </div>
 
           {/* ADD FOOD */}
-          <div className="card add-food text-white">
+
+          <div className="card">
             <AddFood onAdd={(food) => setFoods((prev) => [food, ...prev])} />
           </div>
 
           {/* FOOD LIST */}
-          <div className="card text-white">
+
+          <div className="card">
             <FoodList foods={foods} setFoods={setFoods} />
           </div>
 
-          <div className="card text-white">
+          {/* WATER TRACKER */}
+
+          <div className="card">
             <WaterTracker />
           </div>
+
         </div>
       </div>
     </>

@@ -1,11 +1,21 @@
-/* ===== GLOBAL ===== */
-body {
-  background-color: #000;
-  color: #e5e5e5;
+/* ===============================
+GLOBAL DARK THEME
+================================ */
+
+html,
+body,
+#root {
+  background: #000;
+  color: #ffffff;
+  margin: 0;
+  padding: 0;
   font-family: "Inter", system-ui, sans-serif;
 }
 
-/* ===== NAVBAR ===== */
+/* ===============================
+NAVBAR
+================================ */
+
 .navbar {
   background: #000;
   border-bottom: 1px solid #1f1f1f;
@@ -29,12 +39,34 @@ body {
   cursor: pointer;
 }
 
-/* ===== DASHBOARD LAYOUT ===== */
+/* ===============================
+USERNAME HEADER
+================================ */
+
+.welcome-user {
+  width: 92%;
+  max-width: 1200px;
+  margin: 20px auto 0 auto;
+  padding: 10px 0;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 600;
+  background: transparent;
+}
+
+/* ===============================
+DASHBOARD BACKGROUND
+================================ */
+
 .dashboard-bg {
   min-height: 100vh;
   background: #000;
   padding: 30px 0;
 }
+
+/* ===============================
+CONTAINER
+================================ */
 
 .dashboard-container {
   width: 92%;
@@ -42,13 +74,23 @@ body {
   margin: auto;
 }
 
-/* ===== HEADINGS ===== */
+/* ===============================
+HEADINGS
+================================ */
+
 .dashboard-title {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 20px;
   font-size: 26px;
-  margin-bottom: 10px;
+  font-weight: bold;
+  color: #ffffff;
 }
 
-/* ===== CARD SYSTEM ===== */
+/* ===============================
+CARD SYSTEM
+================================ */
+
 .card {
   background: linear-gradient(180deg, #0d0d0d, #111);
   border: 1px solid #1f1f1f;
@@ -58,14 +100,36 @@ body {
   box-shadow: 0 0 25px rgba(0, 255, 200, 0.06);
 }
 
-/* ===== GRID ===== */
+/* ===============================
+GRID
+================================ */
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 20px;
 }
 
-/* ===== STATS TEXT ===== */
+/* ===============================
+TEXT COLORS (IMPORTANT)
+================================ */
+
+.dashboard-container,
+.dashboard-container h1,
+.dashboard-container h2,
+.dashboard-container h3,
+.dashboard-container h4,
+.dashboard-container p,
+.dashboard-container span,
+.dashboard-container label,
+.dashboard-container div {
+  color: #ffffff !important;
+}
+
+/* ===============================
+STATS TEXT
+================================ */
+
 .stat {
   font-size: 14px;
   margin: 6px 0;
@@ -76,13 +140,19 @@ body {
   font-weight: 600;
 }
 
-/* ===== SMART SUGGESTIONS ===== */
+/* ===============================
+SMART CARD
+================================ */
+
 .smart {
   background: linear-gradient(135deg, #050505, #0f1720);
   border-left: 4px solid #00ffcc;
 }
 
-/* ===== ADD FOOD FORM ===== */
+/* ===============================
+ADD FOOD FORM
+================================ */
+
 .add-food input {
   width: 100%;
   background: #050505;
@@ -108,7 +178,10 @@ body {
   cursor: pointer;
 }
 
-/* ===== FOOD LIST ===== */
+/* ===============================
+FOOD LIST
+================================ */
+
 .food-item {
   background: #080808;
   border: 1px solid #1a1a1a;
@@ -121,8 +194,8 @@ body {
   color: #00ffcc;
 }
 
-/* ================================
-   UPDATE PROFILE UI (DARK THEME)
+/* ===============================
+PROFILE CARD
 ================================ */
 
 .profile-card {
@@ -153,10 +226,6 @@ body {
   color: #aaaaaa;
 }
 
-.profile-card select {
-  cursor: pointer;
-}
-
 .profile-card button {
   margin-top: 10px;
   padding: 12px;
@@ -167,26 +236,11 @@ body {
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.profile-card button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(0, 255, 204, 0.4);
-}
-
-.profile-card button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.dashboard-title {
-  text-align: center;
-  margin-top: 30px;
-  margin-bottom: 10px;
-  font-size: 26px;
-  font-weight: bold;
-}
+/* ===============================
+PROGRESS BAR
+================================ */
 
 progress {
   width: 100%;
