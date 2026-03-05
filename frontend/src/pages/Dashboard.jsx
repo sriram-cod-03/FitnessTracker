@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+
 import WaterTracker from "../components/WaterTracker";
 import Navbar from "../components/Navbar";
 import AddFood from "../components/AddFood";
@@ -8,6 +9,7 @@ import FoodList from "../components/FoodList";
 import SmartMessages from "../components/SmartMessage";
 import ProgressBar from "../components/ProgressBar";
 import FullScreenLoader from "../components/FullScreenLoader";
+
 import "../styles/dashboard.css";
 
 const Dashboard = () => {
@@ -27,12 +29,26 @@ const Dashboard = () => {
 
   const [foods, setFoods] = useState([]);
 
-  /* LOAD DASHBOARD DATA */
+  /* ===============================
+     LOAD DASHBOARD DATA
+  =============================== */
 
   useEffect(() => {
     const loadDashboard = async () => {
       try {
+        /* GET USER NAME */
+
+        const userRes = await api.get("/users/profile");
+
+        console.log("USER DATA:", userRes.data);
+
+        setUsername(userRes.data.name || "User");
+
+        /* GET PROFILE DATA */
+
         const profileRes = await api.get("/profile");
+
+        console.log("PROFILE DATA:", profileRes.data);
 
         if (!profileRes.data) {
           navigate("/setup-profile");
@@ -41,11 +57,11 @@ const Dashboard = () => {
 
         setStats(profileRes.data);
 
-        // username from profile
-        setUsername(profileRes.data.name || profileRes.data.username || "User");
+        /* GET TODAY FOODS */
 
         try {
           const foodRes = await api.get("/foods/today");
+
           setFoods(Array.isArray(foodRes.data) ? foodRes.data : []);
         } catch (err) {
           console.error("Food fetch failed", err);
@@ -53,7 +69,9 @@ const Dashboard = () => {
         }
       } catch (err) {
         console.error("Dashboard load failed", err);
+
         localStorage.removeItem("token");
+
         navigate("/login");
       } finally {
         setLoading(false);
@@ -63,13 +81,19 @@ const Dashboard = () => {
     loadDashboard();
   }, [navigate]);
 
-  /* DAILY TOTALS */
+  /* ===============================
+     DAILY TOTALS
+  =============================== */
 
   const totalCalories = foods.reduce((sum, f) => sum + (f.calories || 0), 0);
   const totalProtein = foods.reduce((sum, f) => sum + (f.protein || 0), 0);
   const totalCarbs = foods.reduce((sum, f) => sum + (f.carbs || 0), 0);
   const totalFats = foods.reduce((sum, f) => sum + (f.fats || 0), 0);
   const totalFiber = foods.reduce((sum, f) => sum + (f.fiber || 0), 0);
+
+  /* ===============================
+     LOADING SCREEN
+  =============================== */
 
   if (loading) {
     return (
@@ -83,19 +107,22 @@ const Dashboard = () => {
   return (
     <>
       {/* NAVBAR */}
+
       <Navbar />
 
-      {/* USERNAME OUTSIDE NAVBAR */}
+      {/* USERNAME */}
+
       <div className="welcome-user">Hello, {username} 👋</div>
 
       <div className="dashboard-bg">
         <div className="dashboard-container text-white">
           {/* HEADER */}
+
           <div className="dashboard-header">
             <h2 className="dashboard-title">Dashboard</h2>
           </div>
 
-          {/* STATS + SMART MESSAGE */}
+          {/* BODY STATS + SMART MESSAGE */}
 
           <div className="stats-grid">
             <div className="card">
