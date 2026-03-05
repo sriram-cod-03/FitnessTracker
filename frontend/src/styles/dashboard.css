@@ -1,72 +1,51 @@
-/* ===============================
-GLOBAL DARK THEME
-================================ */
+/* Import modern, highly readable fitness fonts */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&family=Orbitron:wght@500;700&display=swap');
 
-html,
-body,
-#root {
-  background: #000;
-  color: #ffffff;
+/* ============================================================
+   GLOBAL RESET & UNIVERSAL VISIBILITY FIX
+   ============================================================ */
+* {
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body, #root {
+  background-color: #000 !important;
+  color: #ffffff !important;
   margin: 0;
   padding: 0;
-  font-family: "Inter", system-ui, sans-serif;
 }
 
-/* ===============================
-NAVBAR
-================================ */
-
-.navbar {
-  background: #000;
-  border-bottom: 1px solid #1f1f1f;
-  padding: 14px 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* THE ULTIMATE FIX: This targets every possible text container 
+   inside your dashboard and forces it to white.
+*/
+.dashboard-container, 
+.dashboard-container *, 
+.card, 
+.card *, 
+.stat, 
+.progress-info span {
+  color: #ffffff; /* Default all to white */
+  opacity: 1 !important;
 }
 
-.navbar h3 {
-  color: #00ffcc;
-  margin: 0;
+/* Re-apply the Neon Teal to specific data spans only */
+.stat span, 
+.progress-info span:last-child,
+.neon-text {
+  color: #00ffcc !important;
+  font-family: 'Orbitron', sans-serif;
 }
 
-.logout-btn {
-  background: #ff2e2e;
-  border: none;
-  padding: 6px 14px;
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-/* ===============================
-USERNAME HEADER
-================================ */
-
-.welcome-user {
-  width: 92%;
-  max-width: 1200px;
-  margin: 20px auto 0 auto;
-  padding: 10px 0;
-  color: #ffffff;
-  font-size: 20px;
-  font-weight: 600;
-  background: transparent;
-}
-
-/* ===============================
-DASHBOARD BACKGROUND
-================================ */
-
+/* ============================================================
+   DASHBOARD LAYOUT
+   ============================================================ */
 .dashboard-bg {
   min-height: 100vh;
   background: #000;
-  padding: 30px 0;
+  padding: 40px 0;
 }
-
-/* ===============================
-CONTAINER
-================================ */
 
 .dashboard-container {
   width: 92%;
@@ -74,176 +53,210 @@ CONTAINER
   margin: auto;
 }
 
-/* ===============================
-HEADINGS
-================================ */
-
-.dashboard-title {
-  text-align: center;
-  margin-top: 10px;
-  margin-bottom: 20px;
-  font-size: 26px;
-  font-weight: bold;
-  color: #ffffff;
+.welcome-user {
+  font-size: 30px;
+  font-weight: 500;
+  margin-bottom: 5px;
+  opacity: 0.8 !important;
 }
 
-/* ===============================
-CARD SYSTEM
-================================ */
+.dashboard-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 28px;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
 
+/* ============================================================
+   CARD SYSTEM
+   ============================================================ */
 .card {
   background: linear-gradient(180deg, #0d0d0d, #111);
   border: 1px solid #1f1f1f;
-  border-radius: 14px;
-  padding: 18px;
-  margin-bottom: 20px;
-  box-shadow: 0 0 25px rgba(0, 255, 200, 0.06);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 25px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
 }
 
-/* ===============================
-GRID
-================================ */
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px;
-}
-
-/* ===============================
-TEXT COLORS (IMPORTANT)
-================================ */
-
-.dashboard-container,
-.dashboard-container h1,
-.dashboard-container h2,
-.dashboard-container h3,
-.dashboard-container h4,
-.dashboard-container p,
-.dashboard-container span,
-.dashboard-container label,
-.dashboard-container div {
-  color: #ffffff !important;
-}
-
-/* ===============================
-STATS TEXT
-================================ */
-
-.stat {
-  font-size: 14px;
-  margin: 6px 0;
-}
-
-.stat span {
-  color: #00ffcc;
-  font-weight: 600;
-}
-
-/* ===============================
-SMART CARD
-================================ */
-
-.smart {
-  background: linear-gradient(135deg, #050505, #0f1720);
-  border-left: 4px solid #00ffcc;
-}
-
-/* ===============================
-ADD FOOD FORM
-================================ */
-
-.add-food input {
-  width: 100%;
-  background: #050505;
-  border: 1px solid #1f1f1f;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  color: white;
-}
-
-.add-food input::placeholder {
-  color: #777;
-}
-
-.add-food button {
-  width: 100%;
-  background: #00c853;
-  color: black;
-  border: none;
-  padding: 12px;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-/* ===============================
-FOOD LIST
-================================ */
-
-.food-item {
-  background: #080808;
-  border: 1px solid #1a1a1a;
-  border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 8px;
-}
-
-.food-item strong {
-  color: #00ffcc;
-}
-
-/* ===============================
-PROFILE CARD
-================================ */
-
-.profile-card {
-  max-width: 520px;
-  margin: 40px auto;
-  padding: 30px;
-  background: #0e0e0e;
-  border-radius: 16px;
-  box-shadow: 0 0 25px rgba(0, 255, 204, 0.2);
+.card h3, .card h4 {
+  font-family: 'Montserrat', sans-serif;
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-size: 18px;
   display: flex;
-  flex-direction: column;
-  gap: 14px;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #1f1f1f;
+  padding-bottom: 15px;
 }
 
-.profile-card input,
-.profile-card select {
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: 10px;
-  border: none;
-  outline: none;
-  background: #1c1c1c;
-  color: #ffffff;
-  font-size: 15px;
+.card h3 i, .card h4 i {
+  color: #00ffcc !important;
 }
 
-.profile-card input::placeholder {
-  color: #aaaaaa;
+/* Specific Smart Card Style with Glow */
+.card.smart {
+  border-left: 4px solid #00ffcc;
+  background: linear-gradient(135deg, #050505, #0f1720);
 }
 
-.profile-card button {
-  margin-top: 10px;
-  padding: 12px;
-  border-radius: 12px;
-  border: none;
-  background: linear-gradient(135deg, #00ffcc, #00c853);
-  color: #000;
+/* ============================================================
+   STAT ROWS (Body Stats)
+   ============================================================ */
+.stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stat:last-child {
+  border-bottom: none;
+}
+
+/* This targets the value/number on the right */
+.stat span {
+  font-weight: 700;
   font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
+  letter-spacing: 1px;
 }
 
-/* ===============================
-PROGRESS BAR
-================================ */
+/* ============================================================
+   PROGRESS BARS
+   ============================================================ */
+.progress-wrapper {
+  margin-bottom: 25px;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.progress-info span {
+  font-weight: 600;
+  font-size: 14px;
+}
 
 progress {
   width: 100%;
-  height: 10px;
-  accent-color: #00ffcc;
+  height: 12px;
+  appearance: none;
+  border: none;
+  border-radius: 20px;
+  background-color: #1a1a1a;
+  overflow: hidden;
 }
+
+progress::-webkit-progress-bar {
+  background-color: #1a1a1a;
+  border-radius: 20px;
+}
+
+progress::-webkit-progress-value {
+  background: linear-gradient(90deg, #00ffcc, #00c853);
+  border-radius: 20px;
+}
+
+/* ============================================================
+   INPUTS & BUTTONS
+   ============================================================ */
+input {
+  background: #111 !important;
+  color: #ffffff !important;
+  border: 1px solid #333 !important;
+  padding: 12px !important;
+  border-radius: 8px;
+  width: 100%;
+}
+
+input::placeholder {
+  color: #777 !important;
+}
+
+.add-food button {
+  background: #00ffcc !important;
+  color: #000 !important;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-top: 10px;
+}
+
+/* ============================================================
+   STAR BORDER SYSTEM (Apply to any card or button)
+   ============================================================ */
+
+/* The Outer Container that handles the rotation */
+.star-border {
+  position: relative;
+  padding: 2px; /* This is the thickness of the glow */
+  border-radius: 20px;
+  overflow: hidden;
+  background: #111; 
+  display: flex;
+  margin-bottom: 25px;
+}
+
+/* The Animated Rotating Beam */
+.star-border::before {
+  content: '';
+  position: absolute;
+  width: 300%;
+  height: 300%;
+  top: -100%;
+  left: -100%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    transparent 40%,
+    #00ffcc 45%, 
+    #00ffcc 55%,
+    transparent 60%,
+    transparent 100%
+  );
+  animation: starRotate 4s linear infinite;
+  z-index: 0;
+}
+
+@keyframes starRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* The Inner Content Area */
+.star-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  background: #0d0d0d; /* Matches your dashboard background */
+  border-radius: 18px;
+  padding: 24px;
+}
+
+/* ============================================================
+   TEXT VISIBILITY FIX (Solves the "Dark Text" problem)
+   ============================================================ */
+
+/* Forces all labels, headers, and standard text to be White */
+.star-inner, 
+.star-inner *, 
+.star-inner label, 
+.star-inner p, 
+.star-inner h3,
+.star-inner .progress-info span {
+  color: #ffffff !important;
+  opacity: 1 !important;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Keeps your specific data values in Neon Teal */
+.star-inner span.neon-value {
+  color: #00ffcc !important;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+}
+

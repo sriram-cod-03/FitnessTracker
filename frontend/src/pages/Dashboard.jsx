@@ -30,38 +30,23 @@ const Dashboard = () => {
   const [foods, setFoods] = useState([]);
 
   /* ===============================
-     LOAD DASHBOARD DATA
+      LOAD DASHBOARD DATA
   =============================== */
-
   useEffect(() => {
     const loadDashboard = async () => {
       try {
-        /* GET USER NAME */
-
         const userRes = await api.get("/users/profile");
-
-        console.log("USER DATA:", userRes.data);
-
         setUsername(userRes.data.name || "User");
 
-        /* GET PROFILE DATA */
-
         const profileRes = await api.get("/profile");
-
-        console.log("PROFILE DATA:", profileRes.data);
-
         if (!profileRes.data) {
           navigate("/setup-profile");
           return;
         }
-
         setStats(profileRes.data);
-
-        /* GET TODAY FOODS */
 
         try {
           const foodRes = await api.get("/foods/today");
-
           setFoods(Array.isArray(foodRes.data) ? foodRes.data : []);
         } catch (err) {
           console.error("Food fetch failed", err);
@@ -69,9 +54,7 @@ const Dashboard = () => {
         }
       } catch (err) {
         console.error("Dashboard load failed", err);
-
         localStorage.removeItem("token");
-
         navigate("/login");
       } finally {
         setLoading(false);
@@ -82,18 +65,13 @@ const Dashboard = () => {
   }, [navigate]);
 
   /* ===============================
-     DAILY TOTALS
+      DAILY TOTALS
   =============================== */
-
   const totalCalories = foods.reduce((sum, f) => sum + (f.calories || 0), 0);
   const totalProtein = foods.reduce((sum, f) => sum + (f.protein || 0), 0);
   const totalCarbs = foods.reduce((sum, f) => sum + (f.carbs || 0), 0);
   const totalFats = foods.reduce((sum, f) => sum + (f.fats || 0), 0);
   const totalFiber = foods.reduce((sum, f) => sum + (f.fiber || 0), 0);
-
-  /* ===============================
-     LOADING SCREEN
-  =============================== */
 
   if (loading) {
     return (
@@ -106,37 +84,24 @@ const Dashboard = () => {
 
   return (
     <>
-      {/* NAVBAR */}
-
       <Navbar />
-
-      {/* USERNAME */}
-
-      <div className="welcome-user">Hello, {username} 👋</div>
-
       <div className="dashboard-bg">
-        <div className="dashboard-container text-white">
-          {/* HEADER */}
-
-          <div className="dashboard-header">
-            <h2 className="dashboard-title">Dashboard</h2>
-          </div>
-
+        <div className="dashboard-container">
+          <div className="welcome-user">Hello, {username} 👋</div>
           {/* BODY STATS + SMART MESSAGE */}
-
           <div className="stats-grid">
-            <div className="card">
-              <h4>🎯 Body Stats</h4>
-
-              <p>BMR: {stats.bmr}</p>
-              <p>TDEE: {stats.tdee}</p>
-              <p>Calories: {stats.calories}</p>
-              <p>Protein: {stats.protein} g</p>
-              <p>Carbs: {stats.carbs} g</p>
-              <p>Fiber: {stats.fiber} g</p>
+            <div className="card text-white">
+              <h3><i className="bi bi-person-vcard-fill me-2"></i>Body Stats</h3>
+              <div className="stat">BMR: <span>{stats.bmr}</span></div>
+              <div className="stat">TDEE: <span>{stats.tdee}</span></div>
+              <div className="stat">Daily Goal: <span>{stats.calories} kcal</span></div>
+              <div className="stat">Target Protein: <span>{stats.protein} g</span></div>
+              <div className="stat">Target Carbs: <span>{stats.carbs} g</span></div>
+              <div className="stat">Target Fiber: <span>{stats.fiber} g</span></div>
             </div>
 
             <div className="card smart">
+              <h3><i className="bi bi-lightbulb-fill me-2" style={{color: "#00ffcc"}}></i>Smart Suggestions</h3>
               <SmartMessages
                 remainingCalories={stats.calories - totalCalories}
                 remainingProtein={stats.protein - totalProtein}
@@ -146,63 +111,34 @@ const Dashboard = () => {
           </div>
 
           {/* DAILY PROGRESS */}
-
           <div className="card">
-            <h4>📊 Daily Progress</h4>
-
-            <ProgressBar
-              label="Calories"
-              current={totalCalories}
-              target={stats.calories}
-              unit="kcal"
-            />
-
-            <ProgressBar
-              label="Protein"
-              current={totalProtein}
-              target={stats.protein}
-              unit="g"
-            />
-
-            <ProgressBar
-              label="Carbs"
-              current={totalCarbs}
-              target={stats.carbs}
-              unit="g"
-            />
-
-            <ProgressBar
-              label="Fats"
-              current={totalFats}
-              target={60}
-              unit="g"
-            />
-
-            <ProgressBar
-              label="Fiber"
-              current={totalFiber}
-              target={stats.fiber}
-              unit="g"
-            />
+            <h3><i className="bi bi-bar-chart-fill me-2"></i>Daily Progress</h3>
+            <div className="progress-section text-white">
+                <ProgressBar label="Calories" current={totalCalories} target={stats.calories} unit="kcal" />
+                <ProgressBar label="Protein" current={totalProtein} target={stats.protein} unit="g" />
+                <ProgressBar label="Carbs" current={totalCarbs} target={stats.carbs} unit="g" />
+                <ProgressBar label="Fats" current={totalFats} target={60} unit="g" />
+                <ProgressBar label="Fiber" current={totalFiber} target={stats.fiber} unit="g" />
+            </div>
           </div>
 
-          {/* ADD FOOD */}
+          {/* FOOD MANAGEMENT */}
+          <div className="stats-grid">
+            <div className="card">
+              <h3><i className="bi bi-plus-circle-fill me-2"></i>Add Food</h3>
+              <AddFood onAdd={(food) => setFoods((prev) => [food, ...prev])} />
+            </div>
 
-          <div className="card">
-            <AddFood onAdd={(food) => setFoods((prev) => [food, ...prev])} />
-          </div>
-
-          {/* FOOD LIST */}
-
-          <div className="card">
-            <FoodList foods={foods} setFoods={setFoods} />
+            <div className="card">
+              <FoodList foods={foods} setFoods={setFoods} />
+            </div>
           </div>
 
           {/* WATER TRACKER */}
-
-          <div className="card">
+            <h3><i className="bi bi-droplet-fill me-2" style={{color: "#00d4ff"}}></i>Hydration</h3>
             <WaterTracker />
-          </div>
+         
+
         </div>
       </div>
     </>

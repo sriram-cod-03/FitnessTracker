@@ -1,8 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import "../styles/navbar.css";
+import "../styles/dashboard.css"; 
 
 const Navbar = () => {
-
   const navigate = useNavigate();
 
   const logoutHandler = () => {
@@ -11,45 +10,41 @@ const Navbar = () => {
   };
 
   return (
+    <div className="nav-wrapper">
+      <nav className="navbar-pill">
+        
+        {/* LEFT: BRANDING */}
+        <div className="nav-left">
+          <h3 className="nav-logo" onClick={() => navigate("/")}>
+            fitnesstracker
+          </h3>
+        </div>
 
-    <nav className="navbar-dark">
+        {/* CENTER: NAV BUTTONS WITH STAR BORDER */}
+        <div className="nav-center">
+          <button className="star-pill-btn" onClick={() => navigate("/diet-plan")}>
+            <div className="star-pill-inner">
+               <i className="bi bi-apple"></i> Diet Plan
+            </div>
+          </button>
 
-      {/* LEFT SIDE */}
-      <h3 className="nav-title">
-        Fitness Tracker
-      </h3>
+          <button className="star-pill-btn" onClick={() => navigate("/edit-profile")}>
+            <div className="star-pill-inner">
+               <i className="bi bi-person-gear"></i> Profile
+            </div>
+          </button>
+        </div>
 
+        {/* RIGHT: ACTIONS */}
+        <div className="nav-right">
+          <button className="pill-logout" onClick={logoutHandler}>
+            Logout
+          </button>
+        </div>
 
-      {/* RIGHT SIDE BUTTONS */}
-      <div className="nav-right">
-
-        <button
-          className="motion-btn diet-btn"
-          onClick={() => navigate("/diet-plan")}
-        >
-          🥗 Diet Plan
-        </button>
-
-        <button
-          className="motion-btn edit-btn"
-          onClick={() => navigate("/edit-profile")}
-        >
-          ✏️ Edit Profile
-        </button>
-
-        <button
-          className="logout-btn"
-          onClick={logoutHandler}
-        >
-          Logout
-        </button>
-
-      </div>
-
-    </nav>
-
+      </nav>
+    </div>
   );
-
 };
 
 export default Navbar;
