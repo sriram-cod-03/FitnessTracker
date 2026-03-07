@@ -7,16 +7,9 @@ import "../styles/setupProfile.css";
 const SetupProfile = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-
-  // ✅ FORM STATE
   const [form, setForm] = useState({
-    age: "",
-    height: "",
-    weight: "",
-    gender: "male",
-    activityLevel: "moderate",
-    goal: "cut",
-    dietPreference: "nonveg",
+    age: "", height: "", weight: "", gender: "male",
+    activityLevel: "moderate", goal: "cut", dietPreference: "nonveg",
   });
 
   const handleChange = (e) => {
@@ -25,7 +18,7 @@ const SetupProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setLoading(true); // Start "Setting up your profile" loader
 
     try {
       await api.post("/profile", {
@@ -38,7 +31,7 @@ const SetupProfile = () => {
         dietPreference: form.dietPreference,
       });
 
-      // Redirect to dashboard after successful setup
+      // After setup, move to Dashboard.
       setTimeout(() => {
         navigate("/dashboard");
       }, 1200);
@@ -60,13 +53,9 @@ const SetupProfile = () => {
   return (
     <div className="setup-bg">
       <div className="setup-overlay">
-        {/* Star Border Wrapper for the Edit-Profile Look */}
         <div className="star-border setup-card-width">
           <div className="star-inner">
-            <h3 className="setup-title">
-              <i className="bi bi-person-plus-fill me-2"></i> Setup Your Profile
-            </h3>
-
+            <h3 className="setup-title"><i className="bi bi-person-plus-fill me-2"></i> Setup Your Profile</h3>
             <form onSubmit={handleSubmit} className="setup-form">
               <div className="form-row">
                 <div className="input-group-custom">
@@ -78,7 +67,6 @@ const SetupProfile = () => {
                   <input name="height" type="number" placeholder="cm" value={form.height} onChange={handleChange} required />
                 </div>
               </div>
-
               <div className="form-row">
                 <div className="input-group-custom">
                   <label>Weight (kg)</label>
@@ -92,7 +80,6 @@ const SetupProfile = () => {
                   </select>
                 </div>
               </div>
-
               <div className="input-group-custom">
                 <label>Activity Level</label>
                 <select name="activityLevel" value={form.activityLevel} onChange={handleChange}>
@@ -102,7 +89,6 @@ const SetupProfile = () => {
                   <option value="active">Very Active</option>
                 </select>
               </div>
-
               <div className="input-group-custom">
                 <label>Fitness Goal</label>
                 <select name="goal" value={form.goal} onChange={handleChange}>
@@ -111,7 +97,6 @@ const SetupProfile = () => {
                   <option value="bulk">Muscle Gain</option>
                 </select>
               </div>
-
               <div className="input-group-custom">
                 <label>Diet Preference</label>
                 <select name="dietPreference" value={form.dietPreference} onChange={handleChange}>
@@ -120,10 +105,7 @@ const SetupProfile = () => {
                   <option value="nonveg">Non-Vegetarian</option>
                 </select>
               </div>
-
-              <button type="submit" className="setup-btn-neon">
-                Save & Continue
-              </button>
+              <button type="submit" className="setup-btn-neon">Save & Continue</button>
             </form>
           </div>
         </div>

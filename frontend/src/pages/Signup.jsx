@@ -18,43 +18,45 @@ const Signup = () => {
     type: "error",
   });
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-  try {
-    await api.post("/auth/signup", {
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      password: password.trim(),
-    });
+    try {
+      await api.post("/auth/signup", {
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        password: password.trim(),
+      });
 
-    setToast({
-      show: true,
-      message: "Account created successfully 🎉",
-      type: "success",
-    });
+      setToast({
+        show: true,
+        message: "Account created successfully 🎉",
+        type: "success",
+      });
 
-    // go to login instead of saving token
-    setTimeout(() => {
-      navigate("/login");
-    }, 1200);
-  } catch (err) {
-    setToast({
-      show: true,
-      message:
-        err.response?.data?.message || "Signup failed",
-      type: "error",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
-
+      // go to login instead of saving token
+      setTimeout(() => {
+        navigate("/login");
+      }, 1200);
+    } catch (err) {
+      setToast({
+        show: true,
+        message: err.response?.data?.message || "Signup failed",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <AuthCard
-      title="💪 Signup"
+      title={
+        <>
+          <i className="bi bi-person-plus-fill me-2"></i> Signup
+        </>
+      }
       footer={
         <>
           Already have an account?{" "}

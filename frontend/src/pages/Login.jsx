@@ -8,32 +8,20 @@ import "../styles/login.css";
 
 const Login = () => {
   const navigate = useNavigate();
-
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const [toast, setToast] = useState({
-    show: false,
-    message: "",
-    type: "success",
-  });
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
 
   const { email, password } = formData;
 
-  /* HANDLE INPUT CHANGE */
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  /* LOGIN SUBMIT */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setLoading(true); // Start "Logging you in" loader
 
     try {
       const res = await api.post("/auth/login", {
@@ -42,21 +30,16 @@ const Login = () => {
       });
 
       localStorage.setItem("token", res.data.token);
+      setToast({ show: true, message: "Login successful 🎉", type: "success" });
 
-      setToast({
-        show: true,
-        message: "Login successful 🎉",
-        type: "success",
-      });
-
+      // Move to dashboard. The dashboard will check if setup is needed.
       setTimeout(() => {
         navigate("/dashboard");
-      }, 1200);
+      }, 1000);
     } catch (err) {
       setToast({
         show: true,
-        message:
-          err.response?.data?.message || "Invalid email or password",
+        message: err.response?.data?.message || "Invalid email or password",
         type: "error",
       });
       setLoading(false);
@@ -81,61 +64,21 @@ const Login = () => {
           onClose={() => setToast({ ...toast, show: false })}
         />
       )}
-
-      <AuthCard
-        title="🏋️ Login"
-        footer={
-          <>
-            Don’t have an account?{" "}
-            <Link to="/signup" className="auth-link">
-              Signup
-            </Link>
-          </>
-        }
-      >
+ <AuthCard 
+      title={<><i className="bi bi-person-circle me-2"></i> Login</>}
+      footer={<>Don’t have an account? <Link to="/signup" className="auth-link">Signup</Link></>}
+    >
         <form onSubmit={handleSubmit}>
-          {/* EMAIL */}
           <div className="mb-3">
-            <input
-              type="email"
-              name="email"
-              className="form-control"
-              placeholder="Email"
-              value={email}
-              onChange={handleChange}
-              required
-            />
+            <input type="email" name="email" className="form-control" placeholder="Email" value={email} onChange={handleChange} required />
           </div>
-
-          {/* PASSWORD */}
           <div className="mb-3 password-wrapper">
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              className="form-control password-input"
-              placeholder="Password"
-              value={password}
-              onChange={handleChange}
-              required
-            />
-
-            <button
-              type="button"
-              className="password-toggle"
-              onClick={() => setShowPassword(!showPassword)}
-            >
+            <input type={showPassword ? "text" : "password"} name="password" className="form-control" placeholder="Password" value={password} onChange={handleChange} required />
+            <button type="button" className="password-toggle" onClick={() => setShowPassword(!showPassword)}>
               {showPassword ? "🙈" : "👁️"}
             </button>
           </div>
-
-          {/* LOGIN BUTTON */}
-          <button
-            type="submit"
-            className="btn auth-btn w-100"
-            disabled={!email || !password}
-          >
-            Login
-          </button>
+          <button type="submit" className="btn auth-btn w-100" disabled={!email || !password}>Login</button>
         </form>
       </AuthCard>
     </>
