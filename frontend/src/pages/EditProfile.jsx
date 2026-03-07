@@ -4,14 +4,12 @@ import api from "../services/api";
 import Navbar from "../components/Navbar";
 import FullScreenLoader from "../components/FullScreenLoader";
 import toast from "react-hot-toast";
-import "../styles/setupProfile.css"; // reuse setup profile style
+import "../styles/editProfile.css"; 
 
 const EditProfile = () => {
   const navigate = useNavigate();
-
   const [loading, setLoading] = useState(true);
 
-  // ✅ FORM STATE
   const [form, setForm] = useState({
     age: "",
     height: "",
@@ -22,28 +20,15 @@ const EditProfile = () => {
     dietPreference: "nonveg",
   });
 
-  /* ===============================
-     LOAD EXISTING PROFILE
-  ================================= */
   useEffect(() => {
     const loadProfile = async () => {
       try {
         const res = await api.get("/profile");
-
         if (!res.data) {
           navigate("/setup-profile");
           return;
         }
-
-        setForm({
-          age: res.data.age,
-          height: res.data.height,
-          weight: res.data.weight,
-          gender: res.data.gender,
-          activityLevel: res.data.activityLevel,
-          goal: res.data.goal,
-          dietPreference: res.data.dietPreference,
-        });
+        setForm(res.data);
       } catch (err) {
         console.error("Failed to load profile", err);
         navigate("/dashboard");
@@ -51,156 +36,99 @@ const EditProfile = () => {
         setLoading(false);
       }
     };
-
     loadProfile();
   }, [navigate]);
 
-  /* ===============================
-     HANDLE INPUT CHANGE
-  ================================= */
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  /* ===============================
-     UPDATE PROFILE
-  ================================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      await api.put("/profile", {
-        age: Number(form.age),
-        height: Number(form.height),
-        weight: Number(form.weight),
-        gender: form.gender,
-        activityLevel: form.activityLevel,
-        goal: form.goal,
-        dietPreference: form.dietPreference,
+      await api.put("/profile", { 
+        ...form, 
+        age: Number(form.age), 
+        height: Number(form.height), 
+        weight: Number(form.weight) 
       });
-
       toast.success("Profile updated & recalculated 💪");
-
-      // Redirect to dashboard
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1000);
+      setTimeout(() => navigate("/dashboard"), 1000);
     } catch (err) {
-      console.error("Profile update failed", err);
-      toast.error("Profile update failed");
+      toast.error("Update failed");
       setLoading(false);
     }
   };
 
-  /* ===============================
-     FULL SCREEN LOADER
-  ================================= */
-  if (loading) {
-    return (
-      <FullScreenLoader
-        title="Updating your profile ✏️"
-        subtitle="Recalculating your fitness goals..."
-      />
-    );
-  }
+  if (loading) return <FullScreenLoader title="Updating your profile ✏️" subtitle="Recalculating goals..." />;
 
   return (
     <>
       <Navbar />
-
-      <div className="setup-bg">
-        <div className="setup-overlay">
-          <div className="setup-card">
-            <h3 className="text-center mb-4">
-              Edit Your Fitness Profile ✏️
+      <div className="edit-profile-bg">
+        <div className="star-border edit-card-width">
+          <div className="star-inner">
+            <h3 className="edit-title">
+              <i className="bi bi-pencil-square me-2"></i> Edit Fitness Profile
             </h3>
 
-            <form onSubmit={handleSubmit}>
-              {/* AGE */}
-              <input
-                name="age"
-                className="form-control mb-2"
-                placeholder="Age"
-                type="number"
-                value={form.age}
-                onChange={handleChange}
-                required
-              />
+            <form onSubmit={handleSubmit} className="edit-form">
+              <div className="form-row">
+                <div className="input-group-custom">
+                  <label>Age</label>
+                  <input name="age" type="number" value={form.age} onChange={handleChange} required />
+                </div>
+                <div className="input-group-custom">
+                  <label>Height (cm)</label>
+                  <input name="height" type="number" value={form.height} onChange={handleChange} required />
+                </div>
+              </div>
 
-              {/* HEIGHT */}
-              <input
-                name="height"
-                className="form-control mb-2"
-                placeholder="Height (cm)"
-                type="number"
-                value={form.height}
-                onChange={handleChange}
-                required
-              />
+              <div className="form-row">
+                <div className="input-group-custom">
+                  <label>Weight (kg)</label>
+                  <input name="weight" type="number" value={form.weight} onChange={handleChange} required />
+                </div>
+                <div className="input-group-custom">
+                  <label>Gender</label>
+                  <select name="gender" value={form.gender} onChange={handleChange}>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                </div>
+              </div>
 
-              {/* WEIGHT */}
-              <input
-                name="weight"
-                className="form-control mb-2"
-                placeholder="Weight (kg)"
-                type="number"
-                value={form.weight}
-                onChange={handleChange}
-                required
-              />
+              <div className="input-group-custom">
+                <label>Activity Level</label>
+                <select name="activityLevel" value={form.activityLevel} onChange={handleChange}>
+                  <option value="sedentary">Sedentary</option>
+                  <option value="light">Light</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="active">Very Active</option>
+                </select>
+              </div>
 
-              {/* GENDER */}
-              <select
-                name="gender"
-                className="form-control mb-2"
-                value={form.gender}
-                onChange={handleChange}
-              >
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
+              <div className="input-group-custom">
+                <label>Fitness Goal</label>
+                <select name="goal" value={form.goal} onChange={handleChange}>
+                  <option value="cut">Fat Loss</option>
+                  <option value="maintain">Maintain</option>
+                  <option value="bulk">Muscle Gain</option>
+                </select>
+              </div>
 
-              {/* ACTIVITY LEVEL */}
-              <select
-                name="activityLevel"
-                className="form-control mb-2"
-                value={form.activityLevel}
-                onChange={handleChange}
-              >
-                <option value="sedentary">Sedentary</option>
-                <option value="light">Light</option>
-                <option value="moderate">Moderate</option>
-                <option value="active">Very Active</option>
-              </select>
+              <div className="input-group-custom">
+                <label>Diet Preference</label>
+                <select name="dietPreference" value={form.dietPreference} onChange={handleChange}>
+                  <option value="veg">Vegetarian</option>
+                  <option value="egg">Eggetarian</option>
+                  <option value="nonveg">Non-Vegetarian</option>
+                </select>
+              </div>
 
-              {/* GOAL */}
-              <select
-                name="goal"
-                className="form-control mb-2"
-                value={form.goal}
-                onChange={handleChange}
-              >
-                <option value="cut">Fat Loss</option>
-                <option value="maintain">Maintain</option>
-                <option value="bulk">Muscle Gain</option>
-              </select>
-
-              {/* DIET PREFERENCE */}
-              <select
-                name="dietPreference"
-                className="form-control mb-3"
-                value={form.dietPreference}
-                onChange={handleChange}
-              >
-                <option value="veg">Vegetarian</option>
-                <option value="egg">Eggetarian</option>
-                <option value="nonveg">Non-Vegetarian</option>
-              </select>
-
-              {/* SUBMIT */}
-              <button className="btn btn-success w-100">
-                Update Profile
+              <button type="submit" className="save-btn-neon">
+                Update Profile & Recalculate
               </button>
             </form>
           </div>

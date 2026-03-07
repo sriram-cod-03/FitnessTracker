@@ -90,7 +90,7 @@ const DietPlan = () => {
 
       <div className="diet-bg">
         <h2 className="diet-title">
-          🥗 Your Diet Plan ({diet.preference})
+        Your Diet Plan ({diet.preference})
         </h2>
 
         <MealCard title="Breakfast" meal={diet.breakfast} />

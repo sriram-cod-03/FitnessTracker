@@ -1,78 +1,123 @@
-/* 🌑 Background */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap');
+
 .edit-profile-bg {
-  min-height: calc(100vh - 60px);
-  background: #0d1117;
+  min-height: 100vh;
+  background: #000;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  padding: 40px 20px;
 }
 
-/* Card */
-.edit-profile-card {
+.edit-card-width {
   width: 100%;
-  max-width: 620px;
-  background: #161b22;
-  border-radius: 16px;
-  padding: 28px;
-  box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+  max-width: 550px;
 }
 
-/* Title */
-.edit-title {
-  text-align: center;
-  margin-bottom: 25px;
+/* ===============================
+   STAR BORDER ANIMATION
+   =============================== */
+.star-border {
+  position: relative;
+  padding: 2px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #111;
+  display: flex;
 }
 
-/* Form */
+.star-border::before {
+  content: '';
+  position: absolute;
+  width: 300%;
+  height: 300%;
+  top: -100%;
+  left: -100%;
+  background: conic-gradient(from 0deg, transparent 0%, transparent 40%, #00ffcc 45%, #00ffcc 55%, transparent 60%, transparent 100%);
+  animation: starRotate 4s linear infinite;
+}
+
+.star-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  background: #0d0d0d;
+  border-radius: 18px;
+  padding: 30px;
+}
+
+@keyframes starRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ===============================
+   FIX: DARK INPUTS & SELECTS
+   =============================== */
 .edit-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 20px;
 }
 
-/* Two-column rows */
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  gap: 15px;
 }
 
-/* Inputs & selects */
-.form-row input,
-.form-row select {
-  background: #0d1117;
-  border: 1px solid #2a2f36;
-  color: #fff;
-  padding: 12px;
-  border-radius: 10px;
+.input-group-custom {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-group-custom label {
+  color: #ffffff !important;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
   font-size: 14px;
 }
 
-.form-row input::placeholder {
-  color: #9ca3af;
-}
-
-/* Save button */
-.save-btn {
-  margin-top: 10px;
-  background: #16a34a;
-  border: none;
-  padding: 14px;
+/* THE CORE FIX: This prevents the white background issue */
+.input-group-custom input,
+.input-group-custom select {
+  background: #111 !important; /* Force dark background */
+  border: 1px solid #222 !important;
+  color: #ffffff !important; /* Force white text */
+  padding: 12px;
   border-radius: 10px;
-  color: white;
-  font-size: 15px;
-  font-weight: bold;
+  font-size: 14px;
+  outline: none;
+}
+
+.input-group-custom input:focus,
+.input-group-custom select:focus {
+  border-color: #00ffcc !important;
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
+}
+
+/* NEON BUTTON */
+.save-btn-neon {
+  background: #00ffcc;
+  color: #000;
+  border: none;
+  padding: 15px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
   cursor: pointer;
+  margin-top: 10px;
+  transition: 0.3s ease;
 }
 
-.save-btn:hover {
-  background: #15803d;
+.save-btn-neon:hover {
+  background: #00d4aa;
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.4);
 }
 
-/* 📱 Mobile */
-@media (max-width: 600px) {
-  .form-row {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 500px) {
+  .form-row { grid-template-columns: 1fr; }
 }

@@ -29,44 +29,45 @@ const Dashboard = () => {
 
   const [foods, setFoods] = useState([]);
 
-  /* ===============================
-      LOAD DASHBOARD DATA
-  =============================== */
-  useEffect(() => {
-    const loadDashboard = async () => {
-      try {
-        const userRes = await api.get("/users/profile");
-        setUsername(userRes.data.name || "User");
+useEffect(() => {
+  const loadDashboard = async () => {
+    try {
+      // 1. Load User data
+      const userRes = await api.get("/users/profile");
+      setUsername(userRes.data.name || "User");
 
+      // 2. Load Fitness Profile (Handle 404 separately)
+      try {
         const profileRes = await api.get("/profile");
-        if (!profileRes.data) {
+        setStats(profileRes.data);
+      } catch (profileErr) {
+        if (profileErr.response?.status === 404) {
+          // If profile doesn't exist yet, go to setup
           navigate("/setup-profile");
           return;
         }
-        setStats(profileRes.data);
+      }
 
-        try {
-          const foodRes = await api.get("/foods/today");
-          setFoods(Array.isArray(foodRes.data) ? foodRes.data : []);
-        } catch (err) {
-          console.error("Food fetch failed", err);
-          setFoods([]);
-        }
-      } catch (err) {
-        console.error("Dashboard load failed", err);
+      // 3. Load Food data
+      const foodRes = await api.get("/foods/today");
+      setFoods(Array.isArray(foodRes.data) ? foodRes.data : []);
+
+    } catch (err) {
+      console.error("Dashboard load failed", err);
+      // Only logout if the error is 401 (Invalid Token)
+      if (err.response?.status === 401) {
         localStorage.removeItem("token");
         navigate("/login");
-      } finally {
-        setLoading(false);
       }
-    };
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    loadDashboard();
-  }, [navigate]);
+  loadDashboard();
+}, [navigate]);
 
-  /* ===============================
-      DAILY TOTALS
-  =============================== */
+  /*DAILY TOTALS*/
   const totalCalories = foods.reduce((sum, f) => sum + (f.calories || 0), 0);
   const totalProtein = foods.reduce((sum, f) => sum + (f.protein || 0), 0);
   const totalCarbs = foods.reduce((sum, f) => sum + (f.carbs || 0), 0);

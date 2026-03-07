@@ -50,8 +50,6 @@ const AddFood = ({ onAdd }) => {
 
   return (
     <div className="dashboard-card add-food-card mt-4" style={{ marginBottom: "8px", padding: "6px" }}>
-      <h5 className="mb-3 text-center">🥗 Add Food</h5>
-
       <form onSubmit={handleSubmit} className="add-food-form">
         <input
           className="form-control"

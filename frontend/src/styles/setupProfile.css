@@ -1,33 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&display=swap');
+
 .setup-bg {
   min-height: 100vh;
-  background-image: url("/src/assets/loginbg.jpg"); /* your image */
+  background-image: url("/src/assets/loginbg.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Dark overlay for readability */
 .setup-overlay {
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.75);
   width: 100%;
   min-height: 100vh;
-
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
 
-/* Card */
-.setup-card {
-  background-color: #111;
-  color: #fff;
+.setup-card-width {
   width: 100%;
-  max-width: 420px;
+  max-width: 500px;
+}
+
+/* ===============================
+   STAR BORDER ANIMATION (Edit Profile Style)
+   =============================== */
+.star-border {
+  position: relative;
+  padding: 2px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #111;
+  display: flex;
+}
+
+.star-border::before {
+  content: '';
+  position: absolute;
+  width: 300%;
+  height: 300%;
+  top: -100%;
+  left: -100%;
+  /* Conic gradient for the "Star" beam effect */
+  background: conic-gradient(
+    from 0deg, 
+    transparent 0%, 
+    transparent 40%, 
+    #00ffcc 45%, 
+    #00ffcc 55%, 
+    transparent 60%, 
+    transparent 100%
+  );
+  animation: starRotate 4s linear infinite;
+}
+
+.star-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  background: #0d0d0d;
+  border-radius: 18px;
   padding: 30px;
-  border-radius: 16px;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+}
+
+@keyframes starRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ===============================
+   FORM STYLING & VISIBILITY FIX
+   =============================== */
+.setup-title {
+  font-family: 'Montserrat', sans-serif;
+  color: #ffffff !important;
+  text-align: center;
+  margin-bottom: 25px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.setup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.input-group-custom {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-group-custom label {
+  color: #ffffff !important;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+/* FIX: Forces dark background on inputs/selects to avoid white boxes */
+.input-group-custom input,
+.input-group-custom select {
+  background: #111 !important;
+  border: 1px solid #222 !important;
+  color: #ffffff !important;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+
+.input-group-custom input:focus,
+.input-group-custom select:focus {
+  border-color: #00ffcc !important;
+}
+
+/* Neon Setup Button */
+.setup-btn-neon {
+  margin-top: 15px;
+  background: #00ffcc;
+  color: #000;
+  border: none;
+  padding: 14px;
+  border-radius: 10px;
+  font-weight: 800;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+  transition: 0.3s;
+}
+
+.setup-btn-neon:hover {
+  background: #00d4aa;
+  box-shadow: 0 0 25px rgba(0, 255, 204, 0.5);
+  transform: translateY(-2px);
 }

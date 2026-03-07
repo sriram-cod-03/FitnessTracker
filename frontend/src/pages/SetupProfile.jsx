@@ -6,7 +6,6 @@ import "../styles/setupProfile.css";
 
 const SetupProfile = () => {
   const navigate = useNavigate();
-
   const [loading, setLoading] = useState(false);
 
   // ✅ FORM STATE
@@ -20,12 +19,10 @@ const SetupProfile = () => {
     dietPreference: "nonveg",
   });
 
-  // HANDLE INPUT CHANGE
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // SUBMIT PROFILE
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -41,7 +38,7 @@ const SetupProfile = () => {
         dietPreference: form.dietPreference,
       });
 
-      // Redirect to dashboard
+      // Redirect to dashboard after successful setup
       setTimeout(() => {
         navigate("/dashboard");
       }, 1200);
@@ -51,7 +48,6 @@ const SetupProfile = () => {
     }
   };
 
-  // FULL SCREEN LOADER
   if (loading) {
     return (
       <FullScreenLoader
@@ -64,98 +60,72 @@ const SetupProfile = () => {
   return (
     <div className="setup-bg">
       <div className="setup-overlay">
-        <div className="setup-card">
-          <h3 className="text-center mb-4">
-            Setup Your Fitness Profile 💪
-          </h3>
+        {/* Star Border Wrapper for the Edit-Profile Look */}
+        <div className="star-border setup-card-width">
+          <div className="star-inner">
+            <h3 className="setup-title">
+              <i className="bi bi-person-plus-fill me-2"></i> Setup Your Profile
+            </h3>
 
-          <form onSubmit={handleSubmit}>
-            {/* AGE */}
-            <input
-              name="age"
-              className="form-control mb-2"
-              placeholder="Age"
-              type="number"
-              value={form.age}
-              onChange={handleChange}
-              required
-            />
+            <form onSubmit={handleSubmit} className="setup-form">
+              <div className="form-row">
+                <div className="input-group-custom">
+                  <label>Age</label>
+                  <input name="age" type="number" placeholder="Years" value={form.age} onChange={handleChange} required />
+                </div>
+                <div className="input-group-custom">
+                  <label>Height (cm)</label>
+                  <input name="height" type="number" placeholder="cm" value={form.height} onChange={handleChange} required />
+                </div>
+              </div>
 
-            {/* HEIGHT */}
-            <input
-              name="height"
-              className="form-control mb-2"
-              placeholder="Height (cm)"
-              type="number"
-              value={form.height}
-              onChange={handleChange}
-              required
-            />
+              <div className="form-row">
+                <div className="input-group-custom">
+                  <label>Weight (kg)</label>
+                  <input name="weight" type="number" placeholder="kg" value={form.weight} onChange={handleChange} required />
+                </div>
+                <div className="input-group-custom">
+                  <label>Gender</label>
+                  <select name="gender" value={form.gender} onChange={handleChange}>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                </div>
+              </div>
 
-            {/* WEIGHT */}
-            <input
-              name="weight"
-              className="form-control mb-2"
-              placeholder="Weight (kg)"
-              type="number"
-              value={form.weight}
-              onChange={handleChange}
-              required
-            />
+              <div className="input-group-custom">
+                <label>Activity Level</label>
+                <select name="activityLevel" value={form.activityLevel} onChange={handleChange}>
+                  <option value="sedentary">Sedentary</option>
+                  <option value="light">Light</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="active">Very Active</option>
+                </select>
+              </div>
 
-            {/* GENDER */}
-            <select
-              name="gender"
-              className="form-control mb-2"
-              value={form.gender}
-              onChange={handleChange}
-            >
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-            </select>
+              <div className="input-group-custom">
+                <label>Fitness Goal</label>
+                <select name="goal" value={form.goal} onChange={handleChange}>
+                  <option value="cut">Fat Loss</option>
+                  <option value="maintain">Maintain</option>
+                  <option value="bulk">Muscle Gain</option>
+                </select>
+              </div>
 
-            {/* ACTIVITY LEVEL */}
-            <select
-              name="activityLevel"
-              className="form-control mb-2"
-              value={form.activityLevel}
-              onChange={handleChange}
-            >
-              <option value="sedentary">Sedentary</option>
-              <option value="light">Light</option>
-              <option value="moderate">Moderate</option>
-              <option value="active">Very Active</option>
-            </select>
+              <div className="input-group-custom">
+                <label>Diet Preference</label>
+                <select name="dietPreference" value={form.dietPreference} onChange={handleChange}>
+                  <option value="veg">Vegetarian</option>
+                  <option value="egg">Eggetarian</option>
+                  <option value="nonveg">Non-Vegetarian</option>
+                </select>
+              </div>
 
-            {/* GOAL */}
-            <select
-              name="goal"
-              className="form-control mb-2"
-              value={form.goal}
-              onChange={handleChange}
-            >
-              <option value="cut">Fat Loss</option>
-              <option value="maintain">Maintain</option>
-              <option value="bulk">Muscle Gain</option>
-            </select>
-
-            {/* DIET PREFERENCE */}
-            <select
-              name="dietPreference"
-              className="form-control mb-3"
-              value={form.dietPreference}
-              onChange={handleChange}
-            >
-              <option value="veg">Vegetarian</option>
-              <option value="egg">Eggetarian</option>
-              <option value="nonveg">Non-Vegetarian</option>
-            </select>
-
-            {/* SUBMIT */}
-            <button className="btn btn-success w-100">
-              Save & Continue
-            </button>
-          </form>
+              <button type="submit" className="setup-btn-neon">
+                Save & Continue
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
