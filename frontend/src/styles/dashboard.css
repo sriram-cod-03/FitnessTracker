@@ -1,6 +1,5 @@
 /* Import modern, highly readable fitness fonts */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Poppins:wght@400;500;600&family=Orbitron:wght@500;700&display=swap');
-
 /* ============================================================
    GLOBAL RESET & UNIVERSAL VISIBILITY FIX
    ============================================================ */
@@ -94,12 +93,6 @@ body, #root {
 
 .card h3 i, .card h4 i {
   color: #00ffcc !important;
-}
-
-/* Specific Smart Card Style with Glow */
-.card.smart {
-  border-left: 4px solid #00ffcc;
-  background: linear-gradient(135deg, #050505, #0f1720);
 }
 
 /* ============================================================

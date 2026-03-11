@@ -138,8 +138,6 @@ useEffect(() => {
           {/* WATER TRACKER */}
             <h3><i className="bi bi-droplet-fill me-2" style={{color: "#00d4ff"}}></i>Hydration</h3>
             <WaterTracker />
-         
-
         </div>
       </div>
     </>
