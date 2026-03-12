@@ -23,6 +23,7 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/foods", foodRoutes);
 app.use("/api/diet-plan", dietPlanRoutes);
 app.use("/api/water", waterRoutes);
+app.use('/api/ai', require('./routes/aiRoutes.js'));
 
 app.get("/", (req, res) => {
   res.send("API running...");

@@ -253,3 +253,46 @@ input::placeholder {
   font-weight: 700;
 }
 
+/* AI Scanning Button */
+.ai-scan-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 255, 204, 0.1);
+  border: 1px dashed #00ffcc;
+  color: #00ffcc;
+  padding: 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: 0.3s;
+}
+
+.ai-scan-btn:hover {
+  background: rgba(0, 255, 204, 0.2);
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+}
+
+/* Glowing Laser Line */
+.laser-line {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: #00ffcc;
+  box-shadow: 0 0 15px #00ffcc, 0 0 30px #00ffcc;
+  top: 0;
+  left: 0;
+  animation: laserMove 2s linear infinite;
+}
+
+@keyframes laserMove {
+  0% { top: 0%; }
+  50% { top: 100%; }
+  100% { top: 0%; }
+}
+
+.scanning {
+  opacity: 0.7;
+  pointer-events: none;
+}
