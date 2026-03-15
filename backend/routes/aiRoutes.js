@@ -1,22 +1,51 @@
-const express = require('express');
-const router = express.Router();
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const auth = require('../middleware/authMiddleware'); //
+import express from 'express';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import auth from '../middleware/authMiddleware.js'; // Ensure the .js extension is present
 
-// Initialize Gemini (Ensure your API Key is in .env)
+const router = express.Router();
+
+/**
+ * INITIALIZE GEMINI AI
+ * Uses the key from your .env file
+ */
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+/**
+ * @route   POST /api/ai/scan-meal
+ * @desc    Analyzes an image and returns nutritional macros
+ * @access  Private
+ */
 router.post('/scan-meal', auth, async (req, res) => {
     try {
         const { base64Image } = req.body;
-        if (!base64Image) return res.status(400).json({ message: "No image provided" });
 
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        // 1. Validation
+        if (!base64Image) {
+            return res.status(400).json({ message: "No image provided" });
+        }
 
-        // System prompt to force JSON response
-        const prompt = `Analyze this food image. Identify items and estimate their nutritional value (portion sizes). 
-        Return ONLY a JSON object with these fields: 
-        { "name": String, "calories": Number, "protein": Number, "carbs": Number, "fats": Number, "fiber": Number }`;
+        // 2. Setup the Model
+        // We use gemini-1.5-flash because it is optimized for speed and vision
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-1.5-flash",
+            // Force the AI to return data in JSON format
+            generationConfig: { responseMimeType: "application/json" }
+        });
+
+        // 3. Prepare the Prompt
+        const prompt = `
+            Analyze this food image. Identify the meal and estimate its nutritional content.
+            Return a JSON object with these exact keys:
+            {
+                "name": "string",
+                "calories": number,
+                "protein": number,
+                "carbs": number,
+                "fats": number,
+                "fiber": number
+            }
+            Only return the JSON object.
+        `;
 
         const imagePart = {
             inlineData: {
@@ -25,18 +54,32 @@ router.post('/scan-meal', auth, async (req, res) => {
             },
         };
 
+        // 4. Generate Content from Gemini
         const result = await model.generateContent([prompt, imagePart]);
-        const responseText = result.response.text();
-        
-        // Clean and parse the response
-        const cleanJson = responseText.replace(/```json|```/g, "").trim();
-        const foodData = JSON.parse(cleanJson);
+        const responseText = await result.response.text();
 
-        res.json(foodData);
+        // 5. Clean & Parse JSON
+        // AI sometimes wraps JSON in ```json ... ``` blocks. This removes them.
+        const cleanJson = responseText.replace(/```json|```/g, "").trim();
+        const parsedData = JSON.parse(cleanJson);
+
+        // 6. Return Data to Frontend
+        res.json(parsedData);
+
     } catch (error) {
-        console.error("AI Scan Error:", error);
-        res.status(500).json({ message: "AI failed to process image" });
+        console.error("AI Scanning Error:", error.message);
+
+        // Check for specific API Key issues
+        if (error.message.includes("API key")) {
+            return res.status(500).json({ 
+                message: "AI scanning failed. Please check your API key." 
+            });
+        }
+
+        res.status(500).json({ 
+            message: "AI failed to process the image. Please try again." 
+        });
     }
 });
 
-module.exports = router;
+export default router;
