@@ -65,7 +65,6 @@ const AddFood = ({ onAdd }) => {
         toast.success(`AI Identified: ${res.data.name}! 🥗`);
       } catch (err) {
         console.error("Scanning Error:", err);
-        // This triggers if Render returns 500
         toast.error("AI scanning failed. Check your Render API Key settings."); 
       } finally {
         setIsScanning(false);
@@ -78,7 +77,6 @@ const AddFood = ({ onAdd }) => {
     if (!form.name || !form.calories) return toast.error("Enter at least name and calories");
 
     try {
-      // Ensure the backend adds the 'date' field or handle it here
       const res = await api.post("/foods", form);
       onAdd(res.data);
       setForm({ name: "", calories: "", protein: "", carbs: "", fats: "", fiber: "" });
@@ -120,14 +118,17 @@ const AddFood = ({ onAdd }) => {
           </div>
         </div>
 
-        <div className="row g-2 mb-3">
+        <div className="row g-2 mb-2">
           <div className="col">
             <input name="carbs" type="number" className="form-control neon-input" placeholder="Carbs (g)" value={form.carbs} onChange={(e) => setForm({ ...form, carbs: e.target.value })} />
           </div>
           <div className="col">
-             {/* Added Fats field which was missing in your previous form state updates */}
-            <input name="fiber" type="number" className="form-control neon-input" placeholder="Fiber (g)" value={form.fiber} onChange={(e) => setForm({ ...form, fiber: e.target.value })} />
+            <input name="fats" type="number" className="form-control neon-input" placeholder="Fats (g)" value={form.fats} onChange={(e) => setForm({ ...form, fats: e.target.value })} />
           </div>
+        </div>
+
+        <div className="mb-3">
+          <input name="fiber" type="number" className="form-control neon-input" placeholder="Fiber (g)" value={form.fiber} onChange={(e) => setForm({ ...form, fiber: e.target.value })} />
         </div>
 
         <button type="submit" className="btn btn-success w-100 neon-btn">
