@@ -13,14 +13,14 @@ const AddFood = ({ onAdd }) => {
   });
   const [isScanning, setIsScanning] = useState(false);
 
-  // ✅ Helper to compress image (Prevents 413 Payload Too Large)
+  // ✅ Image Compression Logic
   const compressImage = (base64Str) => {
     return new Promise((resolve) => {
       const img = new Image();
       img.src = base64Str;
       img.onload = () => {
         const canvas = document.createElement("canvas");
-        const MAX_WIDTH = 800; // Resize to max 800px width
+        const MAX_WIDTH = 800;
         let width = img.width;
         let height = img.height;
 
@@ -32,7 +32,6 @@ const AddFood = ({ onAdd }) => {
         canvas.height = height;
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, width, height);
-        // Compress to 70% quality
         resolve(canvas.toDataURL("image/jpeg", 0.7).split(",")[1]);
       };
     });
@@ -48,13 +47,12 @@ const AddFood = ({ onAdd }) => {
     
     reader.onload = async () => {
       try {
-        // 1. Compress the image first
         const compressedBase64 = await compressImage(reader.result);
         
-        // 2. Send to backend
+        // POST to AI Route
         const res = await api.post("/ai/scan-meal", { base64Image: compressedBase64 });
         
-        // 3. Auto-fill the form with AI data
+        // Auto-fill form with AI data
         setForm({
           name: res.data.name || "",
           calories: res.data.calories || "",
@@ -67,7 +65,8 @@ const AddFood = ({ onAdd }) => {
         toast.success(`AI Identified: ${res.data.name}! 🥗`);
       } catch (err) {
         console.error("Scanning Error:", err);
-        toast.error("AI scanning failed. Try a smaller photo.");
+        // This triggers if Render returns 500
+        toast.error("AI scanning failed. Check your Render API Key settings."); 
       } finally {
         setIsScanning(false);
       }
@@ -79,9 +78,9 @@ const AddFood = ({ onAdd }) => {
     if (!form.name || !form.calories) return toast.error("Enter at least name and calories");
 
     try {
+      // Ensure the backend adds the 'date' field or handle it here
       const res = await api.post("/foods", form);
       onAdd(res.data);
-      // Reset form
       setForm({ name: "", calories: "", protein: "", carbs: "", fats: "", fiber: "" });
       toast.success("Food added successfully!");
     } catch (err) {
@@ -91,7 +90,6 @@ const AddFood = ({ onAdd }) => {
 
   return (
     <div className="add-food-container">
-      {/* SCANNER BUTTON */}
       <div className="scanner-wrapper mb-3">
         <label className={`ai-scan-label ${isScanning ? 'scanning-active' : ''}`}>
           <input type="file" accept="image/*" onChange={handleImageUpload} hidden />
@@ -101,13 +99,12 @@ const AddFood = ({ onAdd }) => {
         </label>
       </div>
 
-      {/* FORM FIELDS */}
       <form onSubmit={handleManualSubmit}>
         <div className="mb-2">
           <input
             name="name"
             className="form-control neon-input"
-            placeholder="Food Name (e.g. Scrambled Eggs)"
+            placeholder="Food Name"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             required
@@ -116,48 +113,20 @@ const AddFood = ({ onAdd }) => {
 
         <div className="row g-2 mb-2">
           <div className="col">
-            <input
-              name="calories"
-              type="number"
-              className="form-control neon-input"
-              placeholder="kcal"
-              value={form.calories}
-              onChange={(e) => setForm({ ...form, calories: e.target.value })}
-              required
-            />
+            <input name="calories" type="number" className="form-control neon-input" placeholder="kcal" value={form.calories} onChange={(e) => setForm({ ...form, calories: e.target.value })} required />
           </div>
           <div className="col">
-            <input
-              name="protein"
-              type="number"
-              className="form-control neon-input"
-              placeholder="Protein (g)"
-              value={form.protein}
-              onChange={(e) => setForm({ ...form, protein: e.target.value })}
-            />
+            <input name="protein" type="number" className="form-control neon-input" placeholder="Protein (g)" value={form.protein} onChange={(e) => setForm({ ...form, protein: e.target.value })} />
           </div>
         </div>
 
         <div className="row g-2 mb-3">
           <div className="col">
-            <input
-              name="carbs"
-              type="number"
-              className="form-control neon-input"
-              placeholder="Carbs (g)"
-              value={form.carbs}
-              onChange={(e) => setForm({ ...form, carbs: e.target.value })}
-            />
+            <input name="carbs" type="number" className="form-control neon-input" placeholder="Carbs (g)" value={form.carbs} onChange={(e) => setForm({ ...form, carbs: e.target.value })} />
           </div>
           <div className="col">
-            <input
-              name="fats"
-              type="number"
-              className="form-control neon-input"
-              placeholder="Fats (g)"
-              value={form.fats}
-              onChange={(e) => setForm({ ...form, fats: e.target.value })}
-            />
+             {/* Added Fats field which was missing in your previous form state updates */}
+            <input name="fiber" type="number" className="form-control neon-input" placeholder="Fiber (g)" value={form.fiber} onChange={(e) => setForm({ ...form, fiber: e.target.value })} />
           </div>
         </div>
 
