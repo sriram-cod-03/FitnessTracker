@@ -36,9 +36,9 @@ app.use('/api/foods', foodRoutes);
 app.use('/api/water', waterRoutes);
 app.use('/api/diet-plan', dietPlanRoutes);
 app.use('/api/ai', aiRoutes); 
-// limit 10mb
-app.use(express.json({ limit: '10mb' })); 
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
+// limit 50mb
+app.use(express.json({ limit: '50mb' })); 
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // Database Connection
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('MongoDB Connected (ES Module Mode)'))
