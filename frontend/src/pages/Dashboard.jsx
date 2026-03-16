@@ -83,6 +83,7 @@ const Dashboard = () => {
               <div className="stat">Daily Goal: <span className="neon-text">{stats.calories} kcal</span></div>
               <div className="stat">Protein Target: <span className="neon-text">{stats.protein} g</span></div>
               <div className="stat">Fiber Target: <span className="neon-text">{stats.fiber} g</span></div>
+              <div className="stat">Carbs Target: <span className="neon-text">{stats.carbs} g</span></div>
             </div>
 
             <div className="card smart">
