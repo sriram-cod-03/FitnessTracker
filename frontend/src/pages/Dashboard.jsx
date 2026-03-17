@@ -101,7 +101,7 @@ const Dashboard = () => {
             <div className="progress-section text-white">
                 <ProgressBar label="Calories" current={totals.cal} target={stats.calories} unit="kcal" />
                 <ProgressBar label="Protein" current={totals.pro} target={stats.protein} unit="g" />
-                <ProgressBar label="Carbs" current={totals.carb} target={stats.carb} unit="g" />
+                <ProgressBar label="Carbs" current={totals.carb} target={stats.carbs} unit="g" />
                 <ProgressBar label="Fiber" current={totals.fib} target={stats.fiber} unit="g" />
             </div>
           </div>
