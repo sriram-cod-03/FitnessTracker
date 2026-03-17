@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
-// Route Imports (Matching your Explorer structure)
+// Route Imports
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
@@ -14,26 +14,25 @@ import aiRoutes from './routes/aiRoutes.js';
 dotenv.config();
 const app = express();
 
-// Middleware
 app.use(cors());
 
-/** * ✅ FIX FOR 500 ERRORS: 
- * Increases payload limits to handle the Base64 images from AddFood.jsx.
+/** * ✅ CRITICAL FIX FOR 500 ERRORS: 
+ * These limits are required to receive Base64 images from AddFood.jsx.
  */
 app.use(express.json({ limit: '50mb' })); 
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// ✅ REGISTER ROUTES: Maps your folder structure to URL endpoints
+// ✅ REGISTER ROUTES
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/foods', foodRoutes);
 app.use('/api/water', waterRoutes);
-app.use('/api/ai', aiRoutes); // This handles the AI Scanning
+app.use('/api/ai', aiRoutes); 
 
-// Root health check to fix "Cannot GET /"
+// Root health check
 app.get('/', (req, res) => {
-  res.send('Fitness Tracker API is Live and Running! 🚀');
+  res.send('Fitness Tracker API is Live! 🚀');
 });
 
 // Database Connection

@@ -1,7 +1,7 @@
 import express from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import auth from '../middleware/authMiddleware.js';
-import Food from '../models/Food.js'; // Matches your folder structure
+import Food from '../models/Food.js'; // Imports your specific Food model
 
 const router = express.Router();
 
@@ -12,7 +12,8 @@ router.post('/scan-meal', auth, async (req, res) => {
 
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
         
-        // ✅ FIX: Full model path avoids 404/500 errors on Render
+        /** * ✅ FIX: Use the full stable model path to avoid 404/500 errors on Render.
+         */
         const model = genAI.getGenerativeModel({ 
             model: "models/gemini-1.5-flash",
             generationConfig: { responseMimeType: "application/json" }
@@ -27,10 +28,10 @@ router.post('/scan-meal', auth, async (req, res) => {
 
         const aiData = JSON.parse(result.response.text().replace(/```json|```/g, "").trim());
 
-        // ✅ AUTO-SAVE: Matches your Food.js schema
+        // ✅ AUTO-SAVE: Matches your Food.js schema fields
         const newFood = new Food({
             ...aiData,
-            user: req.user._id, // Assigns current logged-in user
+            user: req.user._id, // Assigns logged-in user ID
             date: new Date().toISOString().split('T')[0] // Formats date as YYYY-MM-DD
         });
 
