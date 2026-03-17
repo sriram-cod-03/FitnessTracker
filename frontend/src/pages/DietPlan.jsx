@@ -46,7 +46,6 @@ const DietPlan = () => {
     const loadDietPlan = async () => {
       try {
         const res = await api.get("/diet-plan");
-        console.log("DIET PLAN RESPONSE:", res.data);
         setDiet(res.data);
       } catch (err) {
         console.error("Failed to load diet plan", err);
