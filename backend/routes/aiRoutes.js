@@ -1,6 +1,7 @@
 import express from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import auth from '../middleware/authMiddleware.js';
+import Food from '../models/Food.js'; // Imports your Food model
 
 const router = express.Router();
 
@@ -9,10 +10,9 @@ router.post('/scan-meal', auth, async (req, res) => {
         const { base64Image } = req.body;
         if (!base64Image) return res.status(400).json({ message: "No image provided" });
 
-        // ✅ FIX 1: Initialize inside the route to ensure Render environment variables are ready
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
         
-        // ✅ FIX 2: Use the full resource path 'models/gemini-1.5-flash' to avoid 404/500 errors
+        // ✅ FIX: Full model path avoids 404/500 errors on Render
         const model = genAI.getGenerativeModel({ 
             model: "models/gemini-1.5-flash",
             generationConfig: { responseMimeType: "application/json" }
@@ -26,14 +26,21 @@ router.post('/scan-meal', auth, async (req, res) => {
         ]);
 
         const responseText = result.response.text();
-        
-        // ✅ FIX 3: Robust cleaning of the response string
         const cleanJson = responseText.replace(/```json|```/g, "").trim();
-        res.json(JSON.parse(cleanJson));
+        const aiData = JSON.parse(cleanJson);
+
+        // ✅ AUTO-SAVE: Matches your specific schema fields
+        const newFood = new Food({
+            ...aiData,
+            user: req.user._id, // Assigns current user
+            date: new Date().toISOString().split('T')[0] // Formats as YYYY-MM-DD string
+        });
+
+        await newFood.save();
+        res.json(newFood); 
 
     } catch (error) {
         console.error("AI Scanning Error:", error.message);
-        // Return the specific error message to help identify if it's a key issue
         res.status(500).json({ message: error.message });
     }
 });

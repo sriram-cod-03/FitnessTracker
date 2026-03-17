@@ -1,11 +1,12 @@
 import axios from "axios";
 
 const api = axios.create({
+  // baseURL must match your Render backend exactly
   baseURL: "https://fitnesstracker-0a0d.onrender.com/api",
   headers: { "Content-Type": "application/json" },
 });
 
-// ✅ Attach token to fix 401 Unauthorized errors
+// ✅ ATTACH TOKEN: Uses your logic to fix 401 Unauthorized errors
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -14,7 +15,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// ✅ Redirect to login only if the session expires
+// ✅ AUTO-LOGOUT: Redirects if token is invalid or expired
 api.interceptors.response.use(
   (response) => response,
   (error) => {
