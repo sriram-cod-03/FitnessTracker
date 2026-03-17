@@ -67,7 +67,7 @@ const Dashboard = () => {
   }), { cal: 0, pro: 0, carb: 0, fat: 0, fib: 0 });
 
   if (loading) {
-    return <FullScreenLoader title="Syncing Fitness Data 💪" subtitle="Talking to the AI..." />;
+    return <FullScreenLoader title="Syncing Fitness Data 💪"/>;
   }
 
   return (
