@@ -23,11 +23,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ✅ REGISTER ROUTES
-app.use('/api/auth', authRoutes);
-app.use('/api/user', userRoutes);
-app.use('/api/profile', profileRoutes);
-app.use('/api/foods', foodRoutes);
-app.use('/api/water', waterRoutes);
+app.use('/api/auth', authRoutes);     // Handles Login/Signup
+app.use('/api/user', userRoutes);     // Handles user profile data
+app.use('/api/profile', profileRoutes); // Handles fitness stats
+app.use('/api/foods', foodRoutes);     // Handles food logs
+app.use('/api/water', waterRoutes);     // Handles hydration logs
 
 // Root health check
 app.get('/', (req, res) => {

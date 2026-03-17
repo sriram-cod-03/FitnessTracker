@@ -4,7 +4,12 @@ import toast from "react-hot-toast";
 
 const AddFood = ({ onAdd }) => {
   const [form, setForm] = useState({ 
-    name: "", calories: "", protein: "", carbs: "", fats: "", fiber: "" 
+    name: "", 
+    calories: "", 
+    protein: "", 
+    carbs: "", 
+    fats: "", 
+    fiber: "" 
   });
 
   const handleManualSubmit = async (e) => {
@@ -16,7 +21,18 @@ const AddFood = ({ onAdd }) => {
     }
 
     try {
-      const res = await api.post("/foods", form);
+      // ✅ FIX: Convert strings to Numbers before sending to backend
+      const submissionData = {
+        name: form.name.trim(),
+        calories: Number(form.calories),
+        protein: Number(form.protein) || 0,
+        carbs: Number(form.carbs) || 0,
+        fats: Number(form.fats) || 0,
+        fiber: Number(form.fiber) || 0,
+        date: new Date().toISOString().split('T')[0] // Standard YYYY-MM-DD format
+      };
+
+      const res = await api.post("/foods", submissionData);
       onAdd(res.data);
       
       // Reset form after success
@@ -27,6 +43,10 @@ const AddFood = ({ onAdd }) => {
     }
   };
 
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
   return (
     <div className="add-food-container">
       <form onSubmit={handleManualSubmit}>
@@ -34,33 +54,33 @@ const AddFood = ({ onAdd }) => {
           <input
             name="name"
             className="form-control neon-input"
-            placeholder="Food Name (e.g., Chicken Biryani)"
+            placeholder="Food Name (e.g., Oats)"
             value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            onChange={handleChange}
             required
           />
         </div>
 
         <div className="row g-2 mb-2">
           <div className="col">
-            <input name="calories" type="number" className="form-control neon-input" placeholder="Calories (kcal)" value={form.calories} onChange={(e) => setForm({ ...form, calories: e.target.value })} required />
+            <input name="calories" type="number" className="form-control neon-input" placeholder="kcal" value={form.calories} onChange={handleChange} required />
           </div>
           <div className="col">
-            <input name="protein" type="number" className="form-control neon-input" placeholder="Protein (g)" value={form.protein} onChange={(e) => setForm({ ...form, protein: e.target.value })} />
+            <input name="protein" type="number" className="form-control neon-input" placeholder="Protein (g)" value={form.protein} onChange={handleChange} />
           </div>
         </div>
 
         <div className="row g-2 mb-2">
           <div className="col">
-            <input name="carbs" type="number" className="form-control neon-input" placeholder="Carbs (g)" value={form.carbs} onChange={(e) => setForm({ ...form, carbs: e.target.value })} />
+            <input name="carbs" type="number" className="form-control neon-input" placeholder="Carbs (g)" value={form.carbs} onChange={handleChange} />
           </div>
           <div className="col">
-            <input name="fats" type="number" className="form-control neon-input" placeholder="Fats (g)" value={form.fats} onChange={(e) => setForm({ ...form, fats: e.target.value })} />
+            <input name="fats" type="number" className="form-control neon-input" placeholder="Fats (g)" value={form.fats} onChange={handleChange} />
           </div>
         </div>
 
         <div className="mb-3">
-          <input name="fiber" type="number" className="form-control neon-input" placeholder="Fiber (g)" value={form.fiber} onChange={(e) => setForm({ ...form, fiber: e.target.value })} />
+          <input name="fiber" type="number" className="form-control neon-input" placeholder="Fiber (g)" value={form.fiber} onChange={handleChange} />
         </div>
 
         <button type="submit" className="btn btn-success w-100 neon-btn">
