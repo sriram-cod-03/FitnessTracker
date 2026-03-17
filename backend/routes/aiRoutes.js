@@ -1,7 +1,7 @@
 import express from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import auth from '../middleware/authMiddleware.js';
-import Food from '../models/Food.js'; // Imports your Food model
+import Food from '../models/Food.js'; // Matches your folder structure
 
 const router = express.Router();
 
@@ -25,15 +25,13 @@ router.post('/scan-meal', auth, async (req, res) => {
             { inlineData: { data: base64Image, mimeType: "image/jpeg" } }
         ]);
 
-        const responseText = result.response.text();
-        const cleanJson = responseText.replace(/```json|```/g, "").trim();
-        const aiData = JSON.parse(cleanJson);
+        const aiData = JSON.parse(result.response.text().replace(/```json|```/g, "").trim());
 
-        // ✅ AUTO-SAVE: Matches your specific schema fields
+        // ✅ AUTO-SAVE: Matches your Food.js schema
         const newFood = new Food({
             ...aiData,
-            user: req.user._id, // Assigns current user
-            date: new Date().toISOString().split('T')[0] // Formats as YYYY-MM-DD string
+            user: req.user._id, // Assigns current logged-in user
+            date: new Date().toISOString().split('T')[0] // Formats date as YYYY-MM-DD
         });
 
         await newFood.save();
