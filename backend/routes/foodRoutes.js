@@ -1,186 +1,159 @@
 import express from "express";
 import axios from "axios";
+import qs from "qs"; // Run 'npm install qs' in your backend folder
 import Food from "../models/Food.js"; //
 import protect from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+/** * ✅ FATSECRET TOKEN HELPER
+ * Fetches a temporary access token using your Client ID and Secret.
+ */
+const getFatSecretToken = async () => {
+  const credentials = Buffer.from(
+    `${process.env.FATSECRET_CLIENT_ID}:${process.env.FATSECRET_CLIENT_SECRET}`
+  ).toString("base64");
+
+  const response = await axios.post(
+    "https://oauth.fatsecret.com/connect/token",
+    qs.stringify({ grant_type: "client_credentials", scope: "basic" }),
+    {
+      headers: {
+        Authorization: `Basic ${credentials}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  );
+  return response.data.access_token;
+};
+
 /* ===============================
-   SEARCH FOOD (Spoonacular API)
-   GET /api/foods/search
+    🔍 SEARCH GLOBAL FOODS
+    GET /api/foods/search
 ================================ */
 router.get("/search", protect, async (req, res) => {
-  const { query } = req.query;
-  const API_KEY = process.env.SPOONACULAR_API_KEY; //
+  const { query } = req.query;
+  if (!query) return res.status(400).json({ message: "Search query is required" });
 
-  if (!query) {
-    return res.status(400).json({ message: "Search query is required" });
+  try {
+    const token = await getFatSecretToken();
+    
+    // 1. Initial search for food items
+    const searchResponse = await axios.get("https://platform.fatsecret.com/rest/server.api", {
+      params: {
+        method: "foods.search",
+        search_expression: query,
+        format: "json",
+        max_results: 5,
+      },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const foodResults = searchResponse.data.foods.food;
+    if (!foodResults) return res.json([]);
+
+    // 2. Map results to get detailed nutrition for each item
+    const detailedFoods = await Promise.all(
+      (Array.isArray(foodResults) ? foodResults : [foodResults]).map(async (f) => {
+        const detailResponse = await axios.get("https://platform.fatsecret.com/rest/server.api", {
+          params: {
+            method: "food.get.v2",
+            food_id: f.food_id,
+            format: "json",
+          },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const serving = detailResponse.data.food.servings.serving[0] || detailResponse.data.food.servings.serving;
+
+        return {
+          name: detailResponse.data.food.food_name,
+          calories: Math.round(serving.calories || 0),
+          protein: Math.round(serving.protein || 0),
+          carbs: Math.round(serving.carbohydrate || 0),
+          fats: Math.round(serving.fat || 0),
+          fiber: Math.round(serving.fiber || 0),
+          image: "https://cdn.fatsecret.com/static/images/default_food.png", 
+        };
+      })
+    );
+
+    res.status(200).json(detailedFoods);
+  } catch (error) {
+    console.error("FatSecret API Error:", error.message);
+    res.status(500).json({ message: "Global database unreachable" });
   }
-
-  try {
-    // 1. Search for ingredient IDs
-    const searchRes = await axios.get(
-      `https://api.spoonacular.com/food/ingredients/search`,
-      { params: { query, apiKey: API_KEY, number: 5 } }
-    );
-
-    // 2. Fetch detailed nutrition for each ID found
-    const detailedResults = await Promise.all(
-      searchRes.data.results.map(async (item) => {
-        const info = await axios.get(
-          `https://api.spoonacular.com/food/ingredients/${item.id}/information`,
-          { params: { amount: 100, unit: "grams", apiKey: API_KEY } }
-        );
-
-        const nutrients = info.data.nutrition.nutrients;
-        const getVal = (name) => nutrients.find((n) => n.name === name)?.amount || 0;
-
-        return {
-          name: info.data.name,
-          calories: Math.round(getVal("Calories")),
-          protein: Math.round(getVal("Protein")),
-          carbs: Math.round(getVal("Net Carbohydrates")),
-          fats: Math.round(getVal("Fat")),
-          fiber: Math.round(getVal("Fiber")),
-          image: `https://spoonacular.com/cdn/ingredients_100x100/${item.image}`,
-        };
-      })
-    );
-
-    res.status(200).json(detailedResults);
-  } catch (error) {
-    console.error("Spoonacular Error:", error.message);
-    res.status(500).json({ message: "Error fetching from Spoonacular database" });
-  }
 });
 
 /* ===============================
-   ADD FOOD
-   POST /api/foods
+    🍎 CRUD OPERATIONS
 ================================ */
+
+// ADD FOOD
 router.post("/", protect, async (req, res) => {
-  try {
-    const today = new Date().toISOString().split("T")[0]; //
-
-    const food = await Food.create({
-      name: req.body.name,
-      calories: Number(req.body.calories),
-      protein: Number(req.body.protein || 0),
-      carbs: Number(req.body.carbs || 0),
-      fats: Number(req.body.fats || 0),
-      fiber: Number(req.body.fiber || 0),
-      user: req.user._id, //
-      date: req.body.date || today, //
-    });
-
-    res.status(201).json(food);
-  } catch (error) {
-    res.status(500).json({ message: "Failed to add food" });
-  }
+  try {
+    const today = new Date().toISOString().split("T")[0]; //
+    const food = await Food.create({
+      ...req.body,
+      user: req.user._id, //
+      date: req.body.date || today,
+    });
+    res.status(201).json(food);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to add food" });
+  }
 });
 
-/* ===============================
-   TODAY FOODS
-   GET /api/foods/today
-================================ */
+// GET TODAY'S FOODS
 router.get("/today", protect, async (req, res) => {
-  try {
-    const today = new Date().toISOString().split("T")[0];
-    res.set("Cache-Control", "no-store");
-
-    const foods = await Food.find({
-      user: req.user._id,
-      date: today,
-    }).sort({ createdAt: -1 });
-
-    res.status(200).json(foods);
-  } catch (error) {
-    res.status(500).json({ message: "Failed to fetch today's foods" });
-  }
+  try {
+    const today = new Date().toISOString().split("T")[0];
+    res.set("Cache-Control", "no-store");
+    const foods = await Food.find({ user: req.user._id, date: today }).sort({ createdAt: -1 });
+    res.status(200).json(foods);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch today's log" });
+  }
 });
 
-/* ===============================
-   WEEKLY NUTRITION
-   GET /api/foods/weekly
-================================ */
+// WEEKLY STATS (For Chart)
 router.get("/weekly", protect, async (req, res) => {
-  try {
-    const today = new Date();
-    const days = [];
+  try {
+    const today = new Date();
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      days.push(d.toISOString().split("T")[0]);
+    }
 
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      days.push(d.toISOString().split("T")[0]);
-    }
-
-    const foods = await Food.find({
-      user: req.user._id,
-      date: { $in: days },
-    });
-
-    const data = days.map((day) => {
-      const dayFoods = foods.filter((f) => f.date === day);
-      return {
-        day,
-        calories: dayFoods.reduce((s, f) => s + (f.calories || 0), 0),
-        protein: dayFoods.reduce((s, f) => s + (f.protein || 0), 0),
-        carbs: dayFoods.reduce((s, f) => s + (f.carbs || 0), 0),
-        fiber: dayFoods.reduce((s, f) => s + (f.fiber || 0), 0),
-      };
-    });
-
-    res.status(200).json(data);
-  } catch (error) {
-    res.status(500).json({ message: "Failed to fetch weekly stats" });
-  }
+    const foods = await Food.find({ user: req.user._id, date: { $in: days } });
+    const data = days.map((day) => {
+      const dayFoods = foods.filter((f) => f.date === day);
+      return {
+        day,
+        calories: dayFoods.reduce((s, f) => s + (f.calories || 0), 0),
+        protein: dayFoods.reduce((s, f) => s + (f.protein || 0), 0),
+      };
+    });
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch weekly stats" });
+  }
 });
 
-/* ===============================
-   UPDATE FOOD
-   PUT /api/foods/:id
-================================ */
-router.put("/:id", protect, async (req, res) => {
-  try {
-    const food = await Food.findById(req.params.id);
-    if (!food) return res.status(404).json({ message: "Food not found" });
-
-    if (food.user.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ message: "Not authorized" });
-    }
-
-    food.name = req.body.name ?? food.name;
-    food.calories = req.body.calories ?? food.calories;
-    food.protein = req.body.protein ?? food.protein;
-    food.carbs = req.body.carbs ?? food.carbs;
-    food.fats = req.body.fats ?? food.fats;
-    food.fiber = req.body.fiber ?? food.fiber;
-
-    const updatedFood = await food.save();
-    res.status(200).json(updatedFood);
-  } catch (error) {
-    res.status(500).json({ message: "Failed to update food" });
-  }
-});
-
-/* ===============================
-   DELETE FOOD
-   DELETE /api/foods/:id
-================================ */
+// DELETE FOOD
 router.delete("/:id", protect, async (req, res) => {
-  try {
-    const food = await Food.findById(req.params.id);
-    if (!food) return res.status(404).json({ message: "Food not found" });
-
-    if (food.user.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ message: "Not authorized" });
-    }
-
-    await food.deleteOne();
-    res.status(200).json({ message: "Food removed" });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to delete food" });
-  }
+  try {
+    const food = await Food.findById(req.params.id);
+    if (!food || food.user.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+    await food.deleteOne();
+    res.status(200).json({ message: "Food removed" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete" });
+  }
 });
 
 export default router;
