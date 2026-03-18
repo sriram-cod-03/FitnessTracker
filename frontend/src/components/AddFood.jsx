@@ -12,12 +12,15 @@ const AddFood = ({ onAdd }) => {
     if (!query.trim()) return;
 
     setLoading(true);
+    setResults([]); // Clear old results
     try {
       const res = await api.get(`/foods/search?query=${query}`);
       setResults(res.data);
-      if (res.data.length === 0) toast.error("No results found.");
+      if (res.data.length === 0) toast.error("No global results found.");
     } catch (err) {
-      toast.error("Global search failed. Check your API settings.");
+      // ✅ Shows the actual error message from backend
+      const msg = err.response?.data?.message || "Search failed.";
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -30,8 +33,7 @@ const AddFood = ({ onAdd }) => {
         date: new Date().toISOString().split('T')[0]
       });
       
-      onAdd(res.data); // Refreshes dashboard instantly
-      
+      onAdd(res.data); 
       toast.success(`${food.name} added!`);
       setResults([]);
       setQuery("");
@@ -46,12 +48,12 @@ const AddFood = ({ onAdd }) => {
         <div className="input-group">
           <input
             className="form-control neon-input"
-            placeholder="Search Global Foods..."
+            placeholder="Search Global Foods (e.g. Chicken, Biryani)"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
           <button className="btn btn-info" type="submit" disabled={loading}>
-            {loading ? <i className="bi bi-hourglass-split"></i> : <i className="bi bi-search"></i>}
+            {loading ? <div className="spinner-border spinner-border-sm"></div> : <i className="bi bi-search"></i>}
           </button>
         </div>
       </form>
