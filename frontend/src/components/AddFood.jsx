@@ -1,92 +1,117 @@
 import { useState } from "react";
-import api from "../services/api";
+import api from "../services/api"; //
 import toast from "react-hot-toast";
 
 const AddFood = ({ onAdd }) => {
-  const [form, setForm] = useState({ 
-    name: "", 
-    calories: "", 
-    protein: "", 
-    carbs: "", 
-    fats: "", 
-    fiber: "" 
-  });
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const handleManualSubmit = async (e) => {
+  // ===============================
+  // 🔍 SEARCH LOGIC
+  // ===============================
+  const handleSearch = async (e) => {
     e.preventDefault();
-    
-    // Validation: Name and Calories are mandatory
-    if (!form.name || !form.calories) {
-      return toast.error("Please enter at least the food name and calories.");
-    }
+    if (!query.trim()) return;
 
+    setLoading(true);
     try {
-      // ✅ FIX: Convert strings to Numbers before sending to backend
-      const submissionData = {
-        name: form.name.trim(),
-        calories: Number(form.calories),
-        protein: Number(form.protein) || 0,
-        carbs: Number(form.carbs) || 0,
-        fats: Number(form.fats) || 0,
-        fiber: Number(form.fiber) || 0,
-        date: new Date().toISOString().split('T')[0] // Standard YYYY-MM-DD format
-      };
-
-      const res = await api.post("/foods", submissionData);
-      onAdd(res.data);
-      
-      // Reset form after success
-      setForm({ name: "", calories: "", protein: "", carbs: "", fats: "", fiber: "" });
-      toast.success("Food added to your log! 🍎");
+      // Calls the new Spoonacular search route in your backend
+      const res = await api.get(`/foods/search?query=${query}`);
+      setResults(res.data);
+      if (res.data.length === 0) {
+        toast.error("No results found. Try a different food name.");
+      }
     } catch (err) {
-      toast.error("Failed to save food. Please try again.");
+      console.error("Search Error:", err);
+      toast.error("Failed to connect to the food database.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  // ===============================
+  // 🍎 ADD TO LOG LOGIC
+  // ===============================
+  const handleAdd = async (food) => {
+    try {
+      // POST to your backend to save the food to MongoDB
+      const res = await api.post("/foods", {
+        ...food,
+        date: new Date().toISOString().split('T')[0] // Ensures correct date format
+      });
+      
+      /** * ✅ AUTOMATIC DASHBOARD UPDATE:
+       * Calling onAdd(res.data) triggers the state update in Dashboard.jsx.
+       * This instantly refreshes ProgressBar, SmartMessages, and FoodList.
+       */
+      onAdd(res.data); 
+      
+      toast.success(`${food.name} added to your log!`);
+      setResults([]); // Clear search results after adding
+      setQuery("");   // Clear search input
+    } catch (err) {
+      toast.error("Failed to save food item.");
+    }
   };
 
   return (
     <div className="add-food-container">
-      <form onSubmit={handleManualSubmit}>
-        <div className="mb-2">
+      {/* Search Bar */}
+      <form onSubmit={handleSearch} className="mb-4">
+        <div className="input-group">
           <input
-            name="name"
             className="form-control neon-input"
-            placeholder="Food Name (e.g., Oats)"
-            value={form.name}
-            onChange={handleChange}
-            required
+            placeholder="Search e.g. Paneer, Chicken, Oats..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
           />
+          <button className="btn btn-info px-4" type="submit" disabled={loading}>
+            {loading ? (
+              <span className="spinner-border spinner-border-sm"></span>
+            ) : (
+              <i className="bi bi-search"></i>
+            )}
+          </button>
         </div>
-
-        <div className="row g-2 mb-2">
-          <div className="col">
-            <input name="calories" type="number" className="form-control neon-input" placeholder="kcal" value={form.calories} onChange={handleChange} required />
-          </div>
-          <div className="col">
-            <input name="protein" type="number" className="form-control neon-input" placeholder="Protein (g)" value={form.protein} onChange={handleChange} />
-          </div>
-        </div>
-
-        <div className="row g-2 mb-2">
-          <div className="col">
-            <input name="carbs" type="number" className="form-control neon-input" placeholder="Carbs (g)" value={form.carbs} onChange={handleChange} />
-          </div>
-          <div className="col">
-            <input name="fats" type="number" className="form-control neon-input" placeholder="Fats (g)" value={form.fats} onChange={handleChange} />
-          </div>
-        </div>
-
-        <div className="mb-3">
-          <input name="fiber" type="number" className="form-control neon-input" placeholder="Fiber (g)" value={form.fiber} onChange={handleChange} />
-        </div>
-
-        <button type="submit" className="btn btn-success w-100 neon-btn">
-          Add to Daily Logs
-        </button>
       </form>
+
+      {/* Search Results List */}
+      <div className="search-results-list" style={{ maxHeight: '350px', overflowY: 'auto', paddingRight: '5px' }}>
+        {results.map((food, index) => (
+          <div key={index} className="search-result-item d-flex align-items-center mb-3 p-2 border rounded border-secondary bg-dark">
+            <img 
+              src={food.image} 
+              alt={food.name} 
+              style={{ width: '50px', height: '50px', borderRadius: '8px', objectFit: 'cover' }} 
+              className="me-3" 
+            />
+            
+            <div className="flex-grow-1">
+              <h6 className="text-white mb-0" style={{ textTransform: 'capitalize', fontSize: '15px' }}>
+                {food.name}
+              </h6>
+              <p className="text-muted mb-0" style={{ fontSize: '12px' }}>
+                {food.calories} kcal | P: {food.protein}g | C: {food.carbs}g | F: {food.fats}g
+              </p>
+            </div>
+
+            <button 
+              className="btn btn-sm btn-success neon-btn" 
+              onClick={() => handleAdd(food)}
+              style={{ padding: '5px 15px' }}
+            >
+              Add
+            </button>
+          </div>
+        ))}
+
+        {results.length > 0 && (
+          <p className="text-center text-muted small mt-2">
+            Items shown per 100g serving
+          </p>
+        )}
+      </div>
     </div>
   );
 };
