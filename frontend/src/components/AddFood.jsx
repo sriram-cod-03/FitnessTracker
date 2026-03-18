@@ -1,5 +1,5 @@
 import { useState } from "react";
-import api from "../services/api"; //
+import api from "../services/api"; 
 import toast from "react-hot-toast";
 
 const AddFood = ({ onAdd }) => {
@@ -7,7 +7,6 @@ const AddFood = ({ onAdd }) => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // SEARCH FOR FOOD
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!query.trim()) return;
@@ -16,7 +15,7 @@ const AddFood = ({ onAdd }) => {
     try {
       const res = await api.get(`/foods/search?query=${query}`);
       setResults(res.data);
-      if (res.data.length === 0) toast.error("No global matches found.");
+      if (res.data.length === 0) toast.error("No results found.");
     } catch (err) {
       toast.error("Global search failed. Check your API settings.");
     } finally {
@@ -24,7 +23,6 @@ const AddFood = ({ onAdd }) => {
     }
   };
 
-  // ADD TO LOG & DASHBOARD
   const handleAdd = async (food) => {
     try {
       const res = await api.post("/foods", {
@@ -32,28 +30,23 @@ const AddFood = ({ onAdd }) => {
         date: new Date().toISOString().split('T')[0]
       });
       
-      /** * ✅ AUTOMATIC UPDATE:
-       * Calling onAdd(res.data) triggers the state update in Dashboard.jsx.
-       * This instantly refreshes ProgressBar and SmartMessages.
-       */
-      onAdd(res.data); 
+      onAdd(res.data); // Refreshes dashboard instantly
       
-      toast.success(`${food.name} added! 🍎`);
+      toast.success(`${food.name} added!`);
       setResults([]);
       setQuery("");
     } catch (err) {
-      toast.error("Error saving food item.");
+      toast.error("Failed to save food.");
     }
   };
 
   return (
     <div className="add-food-container">
-      {/* Search Input */}
       <form onSubmit={handleSearch} className="mb-3">
         <div className="input-group">
           <input
             className="form-control neon-input"
-            placeholder="Search Global Foods (e.g. Biryani, Sushi)"
+            placeholder="Search Global Foods..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -63,17 +56,14 @@ const AddFood = ({ onAdd }) => {
         </div>
       </form>
 
-      {/* Results Section */}
-      <div className="search-results-list" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-        {results.map((food, index) => (
-          <div key={index} className="search-item d-flex align-items-center mb-2 p-2 border rounded border-secondary bg-dark">
+      <div className="results-list" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+        {results.map((food, idx) => (
+          <div key={idx} className="search-item d-flex align-items-center mb-2 p-2 border rounded border-secondary bg-dark">
             <div className="flex-grow-1">
-              <h6 className="mb-0 text-white" style={{ fontSize: '14px' }}>{food.name}</h6>
-              <small className="text-muted">{food.calories} kcal | P: {food.protein}g | C: {food.carbs}g</small>
+              <h6 className="text-white mb-0" style={{ fontSize: '14px' }}>{food.name}</h6>
+              <small className="text-muted">{food.calories} kcal | P: {food.protein}g</small>
             </div>
-            <button className="btn btn-sm btn-success neon-btn" onClick={() => handleAdd(food)}>
-              Add
-            </button>
+            <button className="btn btn-sm btn-success neon-btn" onClick={() => handleAdd(food)}>Add</button>
           </div>
         ))}
       </div>
