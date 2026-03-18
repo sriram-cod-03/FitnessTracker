@@ -1,74 +1,94 @@
 import { useState } from "react";
-import api from "../services/api"; 
+import api from "../services/api";
 import toast from "react-hot-toast";
 
 const AddFood = ({ onAdd }) => {
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({ 
+    name: "", 
+    calories: "", 
+    protein: "", 
+    carbs: "", 
+    fats: "", 
+    fiber: "" 
+  });
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!query.trim()) return;
-
-    setLoading(true);
-    setResults([]); // Clear old results
-    try {
-      const res = await api.get(`/foods/search?query=${query}`);
-      setResults(res.data);
-      if (res.data.length === 0) toast.error("No global results found.");
-    } catch (err) {
-      // ✅ Shows the actual error message from backend
-      const msg = err.response?.data?.message || "Search failed.";
-      toast.error(msg);
-    } finally {
-      setLoading(false);
-    }
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleAdd = async (food) => {
+  const handleManualSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validation: Name and Calories are mandatory
+    if (!form.name || !form.calories) {
+      return toast.error("Please enter at least the food name and calories.");
+    }
+
     try {
-      const res = await api.post("/foods", {
-        ...food,
-        date: new Date().toISOString().split('T')[0]
-      });
+      // ✅ Convert strings to Numbers before sending to backend
+      const submissionData = {
+        name: form.name.trim(),
+        calories: Number(form.calories),
+        protein: Number(form.protein) || 0,
+        carbs: Number(form.carbs) || 0,
+        fats: Number(form.fats) || 0,
+        fiber: Number(form.fiber) || 0,
+        date: new Date().toISOString().split('T')[0] // Formats as YYYY-MM-DD
+      };
+
+      const res = await api.post("/foods", submissionData);
       
-      onAdd(res.data); 
-      toast.success(`${food.name} added!`);
-      setResults([]);
-      setQuery("");
+      // ✅ Triggers the update for Dashboard charts and suggestions
+      onAdd(res.data);
+      
+      // Reset form after success
+      setForm({ name: "", calories: "", protein: "", carbs: "", fats: "", fiber: "" });
+      toast.success(`${submissionData.name} added to your log! 🍎`);
     } catch (err) {
-      toast.error("Failed to save food.");
+      toast.error("Failed to save food item.");
     }
   };
 
   return (
     <div className="add-food-container">
-      <form onSubmit={handleSearch} className="mb-3">
-        <div className="input-group">
+      <form onSubmit={handleManualSubmit}>
+        <div className="mb-2">
           <input
+            name="name"
             className="form-control neon-input"
-            placeholder="Search Global Foods (e.g. Chicken, Biryani)"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Food Name (e.g., Oats)"
+            value={form.name}
+            onChange={handleChange}
+            required
           />
-          <button className="btn btn-info" type="submit" disabled={loading}>
-            {loading ? <div className="spinner-border spinner-border-sm"></div> : <i className="bi bi-search"></i>}
-          </button>
         </div>
-      </form>
 
-      <div className="results-list" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-        {results.map((food, idx) => (
-          <div key={idx} className="search-item d-flex align-items-center mb-2 p-2 border rounded border-secondary bg-dark">
-            <div className="flex-grow-1">
-              <h6 className="text-white mb-0" style={{ fontSize: '14px' }}>{food.name}</h6>
-              <small className="text-muted">{food.calories} kcal | P: {food.protein}g</small>
-            </div>
-            <button className="btn btn-sm btn-success neon-btn" onClick={() => handleAdd(food)}>Add</button>
+        <div className="row g-2 mb-2">
+          <div className="col">
+            <input name="calories" type="number" className="form-control neon-input" placeholder="kcal" value={form.calories} onChange={handleChange} required />
           </div>
-        ))}
-      </div>
+          <div className="col">
+            <input name="protein" type="number" className="form-control neon-input" placeholder="Protein (g)" value={form.protein} onChange={handleChange} />
+          </div>
+        </div>
+
+        <div className="row g-2 mb-2">
+          <div className="col">
+            <input name="carbs" type="number" className="form-control neon-input" placeholder="Carbs (g)" value={form.carbs} onChange={handleChange} />
+          </div>
+          <div className="col">
+            <input name="fats" type="number" className="form-control neon-input" placeholder="Fats (g)" value={form.fats} onChange={handleChange} />
+          </div>
+        </div>
+
+        <div className="mb-3">
+          <input name="fiber" type="number" className="form-control neon-input" placeholder="Fiber (g)" value={form.fiber} onChange={handleChange} />
+        </div>
+
+        <button type="submit" className="btn btn-success w-100 neon-btn">
+          Add to Daily Logs
+        </button>
+      </form>
     </div>
   );
 };
