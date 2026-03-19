@@ -4,10 +4,11 @@ import Signup from "./pages/Signup";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Nutrition from "./pages/Nutrition";
 import SetupProfile from "./pages/SetupProfile";
-import "./styles/progress.css";
 import EditProfile from "./pages/EditProfile";
 import Dashboard from "./pages/Dashboard";
 import DietPlan from "./pages/DietPlan";
+import SearchPage from "./pages/SearchPage"; // ✅ Import the new SearchPage
+import "./styles/progress.css";
 
 function App() {
   return (
@@ -16,11 +17,21 @@ function App() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        
+        {/* PROTECTED ROUTES */}
         <Route
-          path="dashboard"
+          path="/dashboard" // Changed from "dashboard" to "/dashboard" for consistency
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/search" // ✅ Fixed: This clears the "No routes matched" error
+          element={
+            <ProtectedRoute>
+              <SearchPage />
             </ProtectedRoute>
           }
         />

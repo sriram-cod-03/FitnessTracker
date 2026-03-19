@@ -1,8 +1,91 @@
 import express from "express";
+import axios from "axios";
+import qs from "qs"; // Make sure to run: npm install qs axios
 import Food from "../models/Food.js"; 
 import protect from "../middleware/authMiddleware.js";
 
 const router = express.Router();
+
+/** * ✅ AUTHENTICATION HELPER
+ * Gets an OAuth 2.0 token from FatSecret.
+ */
+const getFatSecretToken = async () => {
+  try {
+    const credentials = Buffer.from(
+      `${process.env.FATSECRET_CLIENT_ID}:${process.env.FATSECRET_CLIENT_SECRET}`
+    ).toString("base64");
+
+    const response = await axios.post(
+      "https://oauth.fatsecret.com/connect/token",
+      qs.stringify({ grant_type: "client_credentials", scope: "basic" }),
+      {
+        headers: {
+          Authorization: `Basic ${credentials}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+    return response.data.access_token;
+  } catch (error) {
+    console.error("FatSecret Auth Error:", error.response?.data || error.message);
+    throw new Error("Failed to authenticate with food database");
+  }
+};
+
+/* ===============================
+    🔍 GLOBAL SEARCH (Fixes 404)
+    GET /api/foods/search
+================================ */
+router.get("/search", protect, async (req, res) => {
+  const { query } = req.query;
+  if (!query) return res.status(400).json({ message: "Search query is required" });
+
+  try {
+    const token = await getFatSecretToken();
+    
+    // 1. Search for food items
+    const searchResponse = await axios.get("https://platform.fatsecret.com/rest/server.api", {
+      params: {
+        method: "foods.search",
+        search_expression: query,
+        format: "json",
+        max_results: 5,
+      },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const foodResults = searchResponse.data.foods.food;
+    if (!foodResults) return res.json([]);
+
+    // 2. Fetch detailed nutrition for results
+    const detailedFoods = await Promise.all(
+      (Array.isArray(foodResults) ? foodResults : [foodResults]).map(async (f) => {
+        try {
+          const detailRes = await axios.get("https://platform.fatsecret.com/rest/server.api", {
+            params: { method: "food.get.v2", food_id: f.food_id, format: "json" },
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          const s = detailRes.data.food.servings.serving[0] || detailRes.data.food.servings.serving;
+
+          return {
+            name: detailRes.data.food.food_name,
+            calories: Math.round(s.calories || 0),
+            protein: Math.round(s.protein || 0),
+            carbs: Math.round(s.carbohydrate || 0),
+            fats: Math.round(s.fat || 0),
+            fiber: Math.round(s.fiber || 0),
+            image: "https://cdn.fatsecret.com/static/images/default_food.png", 
+          };
+        } catch (err) { return null; }
+      })
+    );
+
+    res.status(200).json(detailedFoods.filter(f => f !== null));
+  } catch (error) {
+    res.status(500).json({ message: "Global search database is currently down" });
+  }
+});
 
 /* ===============================
     🍎 ADD FOOD (Manual Entry)
@@ -19,7 +102,7 @@ router.post("/", protect, async (req, res) => {
       carbs: Number(req.body.carbs || 0),
       fats: Number(req.body.fats || 0),
       fiber: Number(req.body.fiber || 0),
-      user: req.user._id, //
+      user: req.user._id, 
       date: req.body.date || today,
     });
 
@@ -31,7 +114,6 @@ router.post("/", protect, async (req, res) => {
 
 /* ===============================
     📊 GET TODAY'S FOODS
-    GET /api/foods/today
 ================================ */
 router.get("/today", protect, async (req, res) => {
   try {
@@ -51,7 +133,6 @@ router.get("/today", protect, async (req, res) => {
 
 /* ===============================
     📈 WEEKLY NUTRITION STATS
-    GET /api/foods/weekly
 ================================ */
 router.get("/weekly", protect, async (req, res) => {
   try {
@@ -89,7 +170,6 @@ router.get("/weekly", protect, async (req, res) => {
 
 /* ===============================
     ✏️ UPDATE FOOD
-    PUT /api/foods/:id
 ================================ */
 router.put("/:id", protect, async (req, res) => {
   try {
@@ -109,7 +189,6 @@ router.put("/:id", protect, async (req, res) => {
 
 /* ===============================
     🗑️ DELETE FOOD
-    DELETE /api/foods/:id
 ================================ */
 router.delete("/:id", protect, async (req, res) => {
   try {
@@ -125,4 +204,5 @@ router.delete("/:id", protect, async (req, res) => {
     res.status(500).json({ message: "Failed to delete food" });
   }
 });
+
 export default router;
