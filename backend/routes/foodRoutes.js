@@ -125,5 +125,4 @@ router.delete("/:id", protect, async (req, res) => {
     res.status(500).json({ message: "Failed to delete food" });
   }
 });
-
 export default router;
