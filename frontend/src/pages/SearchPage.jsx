@@ -34,7 +34,7 @@ const SearchPage = () => {
         ...food,
         date: new Date().toISOString().split('T')[0]
       });
-      toast.success(`${food.name} added! 🥗`);
+      toast.success(`${food.name} added to your log! 🥗`);
     } catch (err) {
       toast.error("Failed to add food.");
     }
