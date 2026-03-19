@@ -1,36 +1,39 @@
 import express from "express";
 import axios from "axios";
-import qs from "qs"; // Run 'npm install qs axios' in backend
-import Food from "../models/Food.js"; //
+import qs from "qs"; 
+import Food from "../models/Food.js"; 
 import protect from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-/** * ✅ FATSECRET AUTH HELPER
- * Required for the Navbar global search.
+/** * ✅ AUTHENTICATION HELPER
+ * Fetches token from FatSecret using Render environment variables.
  */
-// This logic in your foodRoutes.js pulls the values from your Render dashboard
 const getFatSecretToken = async () => {
-  const credentials = Buffer.from(
-    `${process.env.FATSECRET_CLIENT_ID}:${process.env.FATSECRET_CLIENT_SECRET}`
-  ).toString("base64");
+  try {
+    const credentials = Buffer.from(
+      `${process.env.FATSECRET_CLIENT_ID}:${process.env.FATSECRET_CLIENT_SECRET}`
+    ).toString("base64");
 
-  const response = await axios.post(
-    "https://oauth.fatsecret.com/connect/token",
-    qs.stringify({ grant_type: "client_credentials", scope: "basic" }),
-    {
-      headers: {
-        Authorization: `Basic ${credentials}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    }
-  );
-  return response.data.access_token;
+    const response = await axios.post(
+      "https://oauth.fatsecret.com/connect/token",
+      qs.stringify({ grant_type: "client_credentials", scope: "basic" }),
+      {
+        headers: {
+          Authorization: `Basic ${credentials}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+    return response.data.access_token;
+  } catch (error) {
+    console.error("FatSecret Auth Error:", error.response?.data || error.message);
+    throw new Error("Failed to authenticate with food database");
+  }
 };
 
 /* ============================================================
-    🔍 GLOBAL SEARCH (For Navbar/SearchPage)
-    GET /api/foods/search
+    🔍 GLOBAL SEARCH
    ============================================================ */
 router.get("/search", protect, async (req, res) => {
   const { query } = req.query;
@@ -39,21 +42,21 @@ router.get("/search", protect, async (req, res) => {
   try {
     const token = await getFatSecretToken();
     
-    // 1. Search for food items
     const searchResponse = await axios.get("https://platform.fatsecret.com/rest/server.api", {
       params: {
         method: "foods.search",
         search_expression: query,
         format: "json",
-        max_results: 5,
+        max_results: 10, // Increased results for better matching
       },
       headers: { Authorization: `Bearer ${token}` },
     });
 
     const foodResults = searchResponse.data.foods?.food;
+    
+    // If no results from API, return empty array immediately
     if (!foodResults) return res.json([]);
 
-    // 2. Fetch detailed nutrition for results
     const detailedFoods = await Promise.all(
       (Array.isArray(foodResults) ? foodResults : [foodResults]).map(async (f) => {
         try {
@@ -62,13 +65,16 @@ router.get("/search", protect, async (req, res) => {
             headers: { Authorization: `Bearer ${token}` },
           });
 
-          const servings = detailRes.data.food?.servings?.serving;
+          const foodData = detailRes.data.food;
+          const servings = foodData?.servings?.serving;
+          
           if (!servings) return null;
 
+          // FatSecret can return serving as an array OR a single object
           const s = Array.isArray(servings) ? servings[0] : servings;
 
           return {
-            name: detailRes.data.food.food_name,
+            name: foodData.food_name,
             calories: Math.round(s.calories || 0),
             protein: Math.round(s.protein || 0),
             carbs: Math.round(s.carbohydrate || 0),
@@ -76,81 +82,57 @@ router.get("/search", protect, async (req, res) => {
             fiber: Math.round(s.fiber || 0),
             image: "https://cdn.fatsecret.com/static/images/default_food.png", 
           };
-        } catch (err) { return null; }
+        } catch (err) { 
+          return null; 
+        }
       })
     );
 
     res.status(200).json(detailedFoods.filter(f => f !== null));
   } catch (error) {
+    console.error("Search Route Error:", error.message);
     res.status(500).json({ message: "Global search failed." });
   }
 });
 
 /* ============================================================
-    🍎 MANUAL LOGGING (For AddFood Component)
-    POST /api/foods
+    🍎 CRUD OPERATIONS (Add, Today, Weekly, Update, Delete)
    ============================================================ */
 router.post("/", protect, async (req, res) => {
   try {
-    const today = new Date().toISOString().split("T")[0]; //
-
+    const today = new Date().toISOString().split("T")[0];
     const food = await Food.create({
-      name: req.body.name,
-      calories: Number(req.body.calories),
-      protein: Number(req.body.protein || 0),
-      carbs: Number(req.body.carbs || 0),
-      fats: Number(req.body.fats || 0),
-      fiber: Number(req.body.fiber || 0),
-      user: req.user._id, //
+      ...req.body,
+      user: req.user._id,
       date: req.body.date || today,
     });
-
     res.status(201).json(food);
   } catch (error) {
     res.status(500).json({ message: "Failed to add food" });
   }
 });
 
-/* ============================================================
-    📊 TODAY'S LOG
-    GET /api/foods/today
-   ============================================================ */
 router.get("/today", protect, async (req, res) => {
   try {
     const today = new Date().toISOString().split("T")[0];
     res.set("Cache-Control", "no-store");
-
-    const foods = await Food.find({
-      user: req.user._id,
-      date: today,
-    }).sort({ createdAt: -1 });
-
+    const foods = await Food.find({ user: req.user._id, date: today }).sort({ createdAt: -1 });
     res.status(200).json(foods);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch today's foods" });
   }
 });
 
-/* ============================================================
-    📈 WEEKLY STATS (For Recharts)
-    GET /api/foods/weekly
-   ============================================================ */
 router.get("/weekly", protect, async (req, res) => {
   try {
     const today = new Date();
     const days = [];
-
     for (let i = 6; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(today.getDate() - i);
       days.push(d.toISOString().split("T")[0]);
     }
-
-    const foods = await Food.find({
-      user: req.user._id,
-      date: { $in: days },
-    });
-
+    const foods = await Food.find({ user: req.user._id, date: { $in: days } });
     const data = days.map((day) => {
       const dayFoods = foods.filter((f) => f.date === day);
       return {
@@ -159,49 +141,36 @@ router.get("/weekly", protect, async (req, res) => {
         protein: dayFoods.reduce((s, f) => s + (f.protein || 0), 0),
       };
     });
-
     res.status(200).json(data);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch weekly stats" });
   }
 });
 
-/* ============================================================
-    ✏️ UPDATE FOOD
-    PUT /api/foods/:id
-   ============================================================ */
 router.put("/:id", protect, async (req, res) => {
   try {
     const food = await Food.findById(req.params.id);
-
     if (!food || food.user.toString() !== req.user._id.toString()) {
       return res.status(401).json({ message: "Not authorized" });
     }
-
     Object.assign(food, req.body);
     const updatedFood = await food.save();
     res.status(200).json(updatedFood);
   } catch (error) {
-    res.status(500).json({ message: "Failed to update food" });
+    res.status(500).json({ message: "Update failed" });
   }
 });
 
-/* ============================================================
-    🗑️ DELETE FOOD
-    DELETE /api/foods/:id
-   ============================================================ */
 router.delete("/:id", protect, async (req, res) => {
   try {
     const food = await Food.findById(req.params.id);
-
     if (!food || food.user.toString() !== req.user._id.toString()) {
       return res.status(401).json({ message: "Not authorized" });
     }
-
     await food.deleteOne();
     res.status(200).json({ message: "Food removed" });
   } catch (error) {
-    res.status(500).json({ message: "Failed to delete food" });
+    res.status(500).json({ message: "Delete failed" });
   }
 });
 

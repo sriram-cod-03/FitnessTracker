@@ -1,29 +1,26 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import api from "../services/api"; //
-import Navbar from "../components/Navbar"; //
+import api from "../services/api";
+import Navbar from "../components/Navbar";
 import toast from "react-hot-toast";
 
 const SearchPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const query = searchParams.get("query"); // Extracts ?query=chicken from URL
+  const query = searchParams.get("query");
   
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // ✅ 1. FETCH RESULTS FROM BACKEND
   useEffect(() => {
     const fetchResults = async () => {
       if (!query) return;
       setLoading(true);
       try {
-        // Calls the FatSecret search route in your backend
         const res = await api.get(`/foods/search?query=${query}`);
         setResults(res.data);
       } catch (err) {
-        console.error("Search Error:", err);
-        toast.error("Global search failed. Please check your connection.");
+        toast.error("Global search failed. Try a simpler term.");
       } finally {
         setLoading(false);
       }
@@ -31,80 +28,53 @@ const SearchPage = () => {
     fetchResults();
   }, [query]);
 
-  // ✅ 2. ADD SELECTED FOOD TO LOG
   const handleAddFood = async (food) => {
     try {
-      // POSTs the selected item to your MongoDB database
       await api.post("/foods", {
         ...food,
-        date: new Date().toISOString().split('T')[0] // Sets to today's date
+        date: new Date().toISOString().split('T')[0]
       });
-      
-      toast.success(`${food.name} added to your log! 🥗`);
-      // Optional: Navigate back to dashboard to see updated progress
-      // navigate("/dashboard"); 
+      toast.success(`${food.name} added! 🥗`);
     } catch (err) {
-      toast.error("Failed to add food item.");
+      toast.error("Failed to add food.");
     }
   };
 
   return (
     <div className="dashboard-bg min-vh-100">
-      <Navbar /> {/* */}
-
+      <Navbar />
       <div className="container mt-5 pt-4">
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2 className="text-white">
-            Results for: <span className="neon-text">"{query}"</span>
-          </h2>
+          <h2 className="text-white">Results for: <span className="neon-text">"{query}"</span></h2>
           <button className="btn btn-outline-info btn-sm" onClick={() => navigate("/dashboard")}>
             <i className="bi bi-arrow-left me-2"></i> Back to Dashboard
           </button>
         </div>
 
-        {/* Loading State */}
-        {loading && (
+        {loading ? (
           <div className="text-center mt-5">
-            <div className="spinner-border text-info" role="status"></div>
-            <p className="text-muted mt-3">Searching global food database...</p>
+            <div className="spinner-border text-info"></div>
+            <p className="text-muted mt-3">Searching global database...</p>
           </div>
-        )}
-
-        {/* Search Results Grid */}
-        {!loading && (
+        ) : (
           <div className="row g-4">
             {results.map((food, index) => (
               <div key={index} className="col-md-6 col-lg-4">
                 <div className="card h-100 bg-dark border-secondary p-3 shadow-lg">
-                  <div className="d-flex justify-content-between align-items-start">
-                    <h5 className="text-white text-capitalize mb-1">{food.name}</h5>
-                    <button 
-                      className="btn btn-sm btn-success neon-btn px-3" 
-                      onClick={() => handleAddFood(food)}
-                    >
-                      Add
-                    </button>
+                  <div className="d-flex justify-content-between">
+                    <h5 className="text-white text-capitalize">{food.name}</h5>
+                    <button className="btn btn-sm btn-success neon-btn" onClick={() => handleAddFood(food)}>Add</button>
                   </div>
-                  
-                  <div className="mt-3">
-                    <div className="d-flex gap-3 text-muted small">
-                      <span>🔥 {food.calories} kcal</span>
-                      <span>🥩 P: {food.protein}g</span>
-                    </div>
-                    <div className="d-flex gap-3 text-muted small mt-1">
-                      <span>🍞 C: {food.carbs}g</span>
-                      <span>🥑 F: {food.fats}g</span>
-                    </div>
+                  <div className="mt-3 small text-muted">
+                    🔥 {food.calories} kcal | 🥩 P: {food.protein}g | 🍞 C: {food.carbs}g
                   </div>
                 </div>
               </div>
             ))}
-
-            {/* Empty State */}
-            {!loading && results.length === 0 && (
+            {results.length === 0 && !loading && (
               <div className="text-center mt-5 w-100">
                 <i className="bi bi-search text-muted display-1"></i>
-                <p className="text-white mt-3">No matching foods found. Try a different search term.</p>
+                <p className="text-white mt-3">No matching foods found. Try "chicken" or "egg".</p>
               </div>
             )}
           </div>
