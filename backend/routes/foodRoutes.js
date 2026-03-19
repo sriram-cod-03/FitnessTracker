@@ -1,13 +1,13 @@
 import express from "express";
 import axios from "axios";
-import qs from "qs"; 
-import Food from "../models/Food.js"; 
+import qs from "qs"; // Run 'npm install qs axios' in backend
+import Food from "../models/Food.js"; //
 import protect from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
 /** * ✅ AUTHENTICATION HELPER
- * Fetches token from FatSecret using Render environment variables.
+ * Required for the Navbar global search.
  */
 const getFatSecretToken = async () => {
   try {
@@ -33,7 +33,7 @@ const getFatSecretToken = async () => {
 };
 
 /* ============================================================
-    🔍 GLOBAL SEARCH
+    🔍 GLOBAL SEARCH (For Navbar/SearchPage)
    ============================================================ */
 router.get("/search", protect, async (req, res) => {
   const { query } = req.query;
@@ -47,14 +47,12 @@ router.get("/search", protect, async (req, res) => {
         method: "foods.search",
         search_expression: query,
         format: "json",
-        max_results: 10, // Increased results for better matching
+        max_results: 10,
       },
       headers: { Authorization: `Bearer ${token}` },
     });
 
     const foodResults = searchResponse.data.foods?.food;
-    
-    // If no results from API, return empty array immediately
     if (!foodResults) return res.json([]);
 
     const detailedFoods = await Promise.all(
@@ -65,46 +63,39 @@ router.get("/search", protect, async (req, res) => {
             headers: { Authorization: `Bearer ${token}` },
           });
 
-          const foodData = detailRes.data.food;
-          const servings = foodData?.servings?.serving;
-          
+          const servings = detailRes.data.food?.servings?.serving;
           if (!servings) return null;
 
-          // FatSecret can return serving as an array OR a single object
+          // ✅ Handles both single objects and arrays from FatSecret
           const s = Array.isArray(servings) ? servings[0] : servings;
 
           return {
-            name: foodData.food_name,
+            name: detailRes.data.food.food_name,
             calories: Math.round(s.calories || 0),
             protein: Math.round(s.protein || 0),
             carbs: Math.round(s.carbohydrate || 0),
             fats: Math.round(s.fat || 0),
-            fiber: Math.round(s.fiber || 0),
-            image: "https://cdn.fatsecret.com/static/images/default_food.png", 
+            fiber: Math.round(s.fiber || 0)
           };
-        } catch (err) { 
-          return null; 
-        }
+        } catch (err) { return null; }
       })
     );
 
     res.status(200).json(detailedFoods.filter(f => f !== null));
   } catch (error) {
-    console.error("Search Route Error:", error.message);
     res.status(500).json({ message: "Global search failed." });
   }
 });
 
 /* ============================================================
-    🍎 CRUD OPERATIONS (Add, Today, Weekly, Update, Delete)
+    🍎 MANUAL LOGGING (POST /api/foods)
    ============================================================ */
 router.post("/", protect, async (req, res) => {
   try {
-    const today = new Date().toISOString().split("T")[0];
     const food = await Food.create({
       ...req.body,
       user: req.user._id,
-      date: req.body.date || today,
+      date: req.body.date || new Date().toISOString().split("T")[0],
     });
     res.status(201).json(food);
   } catch (error) {
@@ -112,55 +103,9 @@ router.post("/", protect, async (req, res) => {
   }
 });
 
-router.get("/today", protect, async (req, res) => {
-  try {
-    const today = new Date().toISOString().split("T")[0];
-    res.set("Cache-Control", "no-store");
-    const foods = await Food.find({ user: req.user._id, date: today }).sort({ createdAt: -1 });
-    res.status(200).json(foods);
-  } catch (error) {
-    res.status(500).json({ message: "Failed to fetch today's foods" });
-  }
-});
-
-router.get("/weekly", protect, async (req, res) => {
-  try {
-    const today = new Date();
-    const days = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      days.push(d.toISOString().split("T")[0]);
-    }
-    const foods = await Food.find({ user: req.user._id, date: { $in: days } });
-    const data = days.map((day) => {
-      const dayFoods = foods.filter((f) => f.date === day);
-      return {
-        day,
-        calories: dayFoods.reduce((s, f) => s + (f.calories || 0), 0),
-        protein: dayFoods.reduce((s, f) => s + (f.protein || 0), 0),
-      };
-    });
-    res.status(200).json(data);
-  } catch (error) {
-    res.status(500).json({ message: "Failed to fetch weekly stats" });
-  }
-});
-
-router.put("/:id", protect, async (req, res) => {
-  try {
-    const food = await Food.findById(req.params.id);
-    if (!food || food.user.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ message: "Not authorized" });
-    }
-    Object.assign(food, req.body);
-    const updatedFood = await food.save();
-    res.status(200).json(updatedFood);
-  } catch (error) {
-    res.status(500).json({ message: "Update failed" });
-  }
-});
-
+/* ============================================================
+    🗑️ DELETE LOGGED FOOD
+   ============================================================ */
 router.delete("/:id", protect, async (req, res) => {
   try {
     const food = await Food.findById(req.params.id);
