@@ -1,41 +1,37 @@
 import express from "express";
 import axios from "axios";
-import qs from "qs"; // Make sure to run: npm install qs axios
-import Food from "../models/Food.js"; 
+import qs from "qs"; // Run 'npm install qs axios' in backend
+import Food from "../models/Food.js"; //
 import protect from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-/** * ✅ AUTHENTICATION HELPER
- * Gets an OAuth 2.0 token from FatSecret.
+/** * ✅ FATSECRET AUTH HELPER
+ * Required for the Navbar global search.
  */
+// This logic in your foodRoutes.js pulls the values from your Render dashboard
 const getFatSecretToken = async () => {
-  try {
-    const credentials = Buffer.from(
-      `${process.env.FATSECRET_CLIENT_ID}:${process.env.FATSECRET_CLIENT_SECRET}`
-    ).toString("base64");
+  const credentials = Buffer.from(
+    `${process.env.FATSECRET_CLIENT_ID}:${process.env.FATSECRET_CLIENT_SECRET}`
+  ).toString("base64");
 
-    const response = await axios.post(
-      "https://oauth.fatsecret.com/connect/token",
-      qs.stringify({ grant_type: "client_credentials", scope: "basic" }),
-      {
-        headers: {
-          Authorization: `Basic ${credentials}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
-    return response.data.access_token;
-  } catch (error) {
-    console.error("FatSecret Auth Error:", error.response?.data || error.message);
-    throw new Error("Failed to authenticate with food database");
-  }
+  const response = await axios.post(
+    "https://oauth.fatsecret.com/connect/token",
+    qs.stringify({ grant_type: "client_credentials", scope: "basic" }),
+    {
+      headers: {
+        Authorization: `Basic ${credentials}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  );
+  return response.data.access_token;
 };
 
-/* ===============================
-    🔍 GLOBAL SEARCH (Fixes 404)
+/* ============================================================
+    🔍 GLOBAL SEARCH (For Navbar/SearchPage)
     GET /api/foods/search
-================================ */
+   ============================================================ */
 router.get("/search", protect, async (req, res) => {
   const { query } = req.query;
   if (!query) return res.status(400).json({ message: "Search query is required" });
@@ -54,7 +50,7 @@ router.get("/search", protect, async (req, res) => {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    const foodResults = searchResponse.data.foods.food;
+    const foodResults = searchResponse.data.foods?.food;
     if (!foodResults) return res.json([]);
 
     // 2. Fetch detailed nutrition for results
@@ -66,7 +62,10 @@ router.get("/search", protect, async (req, res) => {
             headers: { Authorization: `Bearer ${token}` },
           });
 
-          const s = detailRes.data.food.servings.serving[0] || detailRes.data.food.servings.serving;
+          const servings = detailRes.data.food?.servings?.serving;
+          if (!servings) return null;
+
+          const s = Array.isArray(servings) ? servings[0] : servings;
 
           return {
             name: detailRes.data.food.food_name,
@@ -83,17 +82,17 @@ router.get("/search", protect, async (req, res) => {
 
     res.status(200).json(detailedFoods.filter(f => f !== null));
   } catch (error) {
-    res.status(500).json({ message: "Global search database is currently down" });
+    res.status(500).json({ message: "Global search failed." });
   }
 });
 
-/* ===============================
-    🍎 ADD FOOD (Manual Entry)
+/* ============================================================
+    🍎 MANUAL LOGGING (For AddFood Component)
     POST /api/foods
-================================ */
+   ============================================================ */
 router.post("/", protect, async (req, res) => {
   try {
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toISOString().split("T")[0]; //
 
     const food = await Food.create({
       name: req.body.name,
@@ -102,7 +101,7 @@ router.post("/", protect, async (req, res) => {
       carbs: Number(req.body.carbs || 0),
       fats: Number(req.body.fats || 0),
       fiber: Number(req.body.fiber || 0),
-      user: req.user._id, 
+      user: req.user._id, //
       date: req.body.date || today,
     });
 
@@ -112,9 +111,10 @@ router.post("/", protect, async (req, res) => {
   }
 });
 
-/* ===============================
-    📊 GET TODAY'S FOODS
-================================ */
+/* ============================================================
+    📊 TODAY'S LOG
+    GET /api/foods/today
+   ============================================================ */
 router.get("/today", protect, async (req, res) => {
   try {
     const today = new Date().toISOString().split("T")[0];
@@ -131,9 +131,10 @@ router.get("/today", protect, async (req, res) => {
   }
 });
 
-/* ===============================
-    📈 WEEKLY NUTRITION STATS
-================================ */
+/* ============================================================
+    📈 WEEKLY STATS (For Recharts)
+    GET /api/foods/weekly
+   ============================================================ */
 router.get("/weekly", protect, async (req, res) => {
   try {
     const today = new Date();
@@ -152,13 +153,10 @@ router.get("/weekly", protect, async (req, res) => {
 
     const data = days.map((day) => {
       const dayFoods = foods.filter((f) => f.date === day);
-
       return {
         day,
         calories: dayFoods.reduce((s, f) => s + (f.calories || 0), 0),
         protein: dayFoods.reduce((s, f) => s + (f.protein || 0), 0),
-        carbs: dayFoods.reduce((s, f) => s + (f.carbs || 0), 0),
-        fiber: dayFoods.reduce((s, f) => s + (f.fiber || 0), 0),
       };
     });
 
@@ -168,9 +166,10 @@ router.get("/weekly", protect, async (req, res) => {
   }
 });
 
-/* ===============================
+/* ============================================================
     ✏️ UPDATE FOOD
-================================ */
+    PUT /api/foods/:id
+   ============================================================ */
 router.put("/:id", protect, async (req, res) => {
   try {
     const food = await Food.findById(req.params.id);
@@ -187,9 +186,10 @@ router.put("/:id", protect, async (req, res) => {
   }
 });
 
-/* ===============================
+/* ============================================================
     🗑️ DELETE FOOD
-================================ */
+    DELETE /api/foods/:id
+   ============================================================ */
 router.delete("/:id", protect, async (req, res) => {
   try {
     const food = await Food.findById(req.params.id);
