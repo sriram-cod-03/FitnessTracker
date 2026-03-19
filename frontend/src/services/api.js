@@ -2,7 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   // baseURL must match your Render backend exactly
-  baseURL: "https://fitnesstracker-0a0d.onrender.com/api",
+  baseURL: "https://fitnesstracker-a6jo.onrender.com/api",
   headers: { "Content-Type": "application/json" },
 });
 
