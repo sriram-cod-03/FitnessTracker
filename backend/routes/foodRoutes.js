@@ -12,7 +12,7 @@ const router = express.Router();
 router.get("/search", protect, async (req, res) => {
   const { query } = req.query;
 
-  // Prevent caching so you always see your code changes immediately
+  // Force fresh data to avoid browser caching issues
   res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
 
   if (!query) {
@@ -20,7 +20,8 @@ router.get("/search", protect, async (req, res) => {
   }
 
   try {
-    const response = await axios.get("https://api.food-database/v2/parser", {
+    // Calling the Edamam Food Database API
+    const response = await axios.get("https://api.edamam.com/api/food-database/v2/parser", {
       params: {
         app_id: process.env.EDAMAM_APP_ID,
         app_key: process.env.EDAMAM_APP_KEY,
@@ -32,10 +33,10 @@ router.get("/search", protect, async (req, res) => {
     const hints = response.data.hints;
     if (!hints || hints.length === 0) return res.json([]);
 
-    // Extracting nutrients - specifically adding FIBTG (Fiber)
+    // Map Edamam's data structure to your app's format
     const results = hints.map((item) => {
       const f = item.food;
-      const n = f.nutrients;
+      const n = f.nutrients; // Accessing the nutrients object
 
       return {
         name: f.label,
@@ -43,15 +44,16 @@ router.get("/search", protect, async (req, res) => {
         protein: Math.round(n.PROCNT || 0),
         carbs: Math.round(n.CHOCDF || 0),
         fats: Math.round(n.FAT || 0),
-        fiber: Math.round(n.FIBTG || 0), // ✅ This fixes your Postman issue
+        fiber: Math.round(n.FIBTG || 0), // ✅ Fiber (FIBTG) is now included
         image: f.image || "https://cdn-icons-png.flaticon.com/512/706/706164.png"
       };
     });
 
     res.status(200).json(results);
   } catch (error) {
-    console.error("❌ Edamam Error:", error.response?.data || error.message);
-    res.status(500).json({ message: "Failed to fetch results from Edamam." });
+    // Logging the specific error from Edamam to your terminal/Render logs
+    console.error("❌ Edamam API Error:", error.response?.data || error.message);
+    res.status(500).json({ message: "Failed to fetch results from global database." });
   }
 });
 
@@ -61,16 +63,17 @@ router.get("/search", protect, async (req, res) => {
    ============================================================ */
 router.post("/", protect, async (req, res) => {
   try {
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 
     const food = await Food.create({
-      ...req.body,
+      ...req.body, // This will include the 'fiber' sent from frontend
       user: req.user._id,
       date: req.body.date || today,
     });
 
     res.status(201).json(food);
   } catch (error) {
+    console.error("❌ Log Error:", error.message);
     res.status(500).json({ message: "Failed to log food entry." });
   }
 });
@@ -102,14 +105,19 @@ router.delete("/:id", protect, async (req, res) => {
   try {
     const food = await Food.findById(req.params.id);
 
-    if (!food || food.user.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ message: "Not authorized." });
+    if (!food) {
+      return res.status(404).json({ message: "Food entry not found." });
+    }
+
+    // Ensure the food belongs to the logged-in user
+    if (food.user.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: "Not authorized to delete this." });
     }
 
     await food.deleteOne();
     res.status(200).json({ message: "Deleted successfully." });
   } catch (error) {
-    res.status(500).json({ message: "Delete failed." });
+    res.status(500).json({ message: "Delete operation failed." });
   }
 });
 
