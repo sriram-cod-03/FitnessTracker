@@ -1,0 +1,32 @@
+/* FitnessTracker Neon Styles */
+
+/* 1. Neon Text for generic elements */
+.neon-text {
+  color: #00FFFF; /* Bright Cyan */
+  text-shadow: 0 0 5px #00FFFF, 0 0 10px #00FFFF;
+}
+
+/* 2. Style the individual food cards */
+.food-card {
+  border: 1px solid rgba(0, 255, 255, 0.3); /* Dim cyan border */
+  border-radius: 12px;
+  background-color: #0d0d0d !important; /* Dark background */
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2); /* Soft glow around card */
+  transition: all 0.3s ease;
+}
+
+.food-card:hover {
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.6); /* Intense glow on hover */
+  transform: translateY(-5px);
+}
+
+/* 3. Force card title and data text to be neon */
+.food-card .card-title {
+  color: #00FFFF !important;
+  text-transform: capitalize;
+  font-weight: bold;
+}
+
+.food-card .card-text {
+  color: rgba(0, 255, 255, 0.9) !important; /* Slightly dimmer cyan for details */
+}
