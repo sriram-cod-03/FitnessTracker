@@ -1,0 +1,39 @@
+/* Footer Background */
+.footer-bg {
+  background-color: #000000 !important;
+}
+
+/* Flat Cyan (No Glow) */
+.flat-cyan {
+  color: #00FFFF !important;
+  text-shadow: none !important; /* Removes the glow */
+}
+
+/* White Text Override */
+.footer-bg p, 
+.footer-bg span, 
+.footer-bg li, 
+.footer-bg a {
+  color: #ffffff !important;
+}
+
+/* Hover Effect */
+.hover-cyan:hover {
+  color: #00FFFF !important;
+  transition: 0.2s ease-in-out;
+}
+
+/* Social Icon Hover */
+/* 1. Default Style (White & Flat) */
+.social-icon {
+  color: #ffffff !important;
+  font-size: 1.5rem;
+  text-decoration: none;
+  transition: all 0.3s ease-in-out; /* Makes the glow fade in smoothly */
+}
+
+/* 2. Neon Hover Effect */
+.social-icon:hover {
+  color: #00FFFF !important; /* Changes to Cyan */
+  transform: translateY(-3px); /* Optional: makes the icon pop up slightly */
+}

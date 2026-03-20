@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import DietPlan from "./pages/DietPlan";
 import SearchPage from "./pages/SearchPage";
 import "./styles/progress.css";
+import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -82,6 +83,7 @@ function App() {
         {/* OPTIONAL: 404 Catch-all route */}
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
+    <Footer/>
     </BrowserRouter>
   );
 }
