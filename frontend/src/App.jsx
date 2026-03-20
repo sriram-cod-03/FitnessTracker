@@ -7,7 +7,7 @@ import SetupProfile from "./pages/SetupProfile";
 import EditProfile from "./pages/EditProfile";
 import Dashboard from "./pages/Dashboard";
 import DietPlan from "./pages/DietPlan";
-import SearchPage from "./pages/SearchPage"; // ✅ Import the new SearchPage
+import SearchPage from "./pages/SearchPage";
 import "./styles/progress.css";
 
 function App() {
@@ -20,7 +20,7 @@ function App() {
         
         {/* PROTECTED ROUTES */}
         <Route
-          path="/dashboard" // Changed from "dashboard" to "/dashboard" for consistency
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
@@ -28,7 +28,7 @@ function App() {
           }
         />
         <Route
-          path="/search" // ✅ Fixed: This clears the "No routes matched" error
+          path="/search"
           element={
             <ProtectedRoute>
               <SearchPage />
@@ -43,6 +43,17 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* ✅ FIXED: Added the /profile route here */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <EditProfile />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/setup-profile"
           element={
@@ -67,6 +78,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* OPTIONAL: 404 Catch-all route */}
+        <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
     </BrowserRouter>
   );

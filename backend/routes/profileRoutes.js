@@ -2,14 +2,9 @@ import express from "express";
 import protect from "../middleware/authMiddleware.js";
 import Profile from "../models/Profile.js";
 import User from "../models/User.js";
-
 const router = express.Router();
 
-/* ============================
-CREATE / UPDATE PROFILE
-POST /api/profile
-============================ */
-
+/*CREATE / UPDATE PROFILE POST /api/profile */
 router.post("/", protect, async (req, res) => {
   try {
     const { age, gender, height, weight, activityLevel, goal, dietPreference } =
@@ -73,10 +68,7 @@ router.post("/", protect, async (req, res) => {
   }
 });
 
-/* ============================
-GET PROFILE
-GET /api/profile
-============================ */
+/*GET PROFILE GET /api/profile*/
 
 router.get("/", protect, async (req, res) => {
   try {
@@ -102,10 +94,7 @@ router.get("/", protect, async (req, res) => {
   }
 });
 
-/* ============================
-UPDATE PROFILE
-PUT /api/profile
-============================ */
+/*UPDATE PROFILE PUT /api/profile*/
 
 router.put("/", protect, async (req, res) => {
   try {

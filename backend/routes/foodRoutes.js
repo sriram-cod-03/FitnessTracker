@@ -4,11 +4,7 @@ import Food from "../models/Food.js";
 import protect from "../middleware/authMiddleware.js";
 
 const router = express.Router();
-
-/* ============================================================
-    🔍 GLOBAL SEARCH (Edamam API Version)
-    GET /api/foods/search?query=mutton
-   ============================================================ */
+/*GLOBAL SEARCH (Edamam API Version) GET /api/foods/search?query */
 router.get("/search", protect, async (req, res) => {
   const { query } = req.query;
 
@@ -18,7 +14,6 @@ router.get("/search", protect, async (req, res) => {
   if (!query) {
     return res.status(400).json({ message: "Search query is required" });
   }
-
   try {
     // Calling the Edamam Food Database API
     const response = await axios.get("https://api.edamam.com/api/food-database/v2/parser", {
@@ -57,10 +52,7 @@ router.get("/search", protect, async (req, res) => {
   }
 });
 
-/* ============================================================
-    🍎 LOGGING (Save Food to MongoDB)
-    POST /api/foods
-   ============================================================ */
+/*LOGGING (Save Food to MongoDB) POST /api/foods */
 router.post("/", protect, async (req, res) => {
   try {
     const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
@@ -78,10 +70,7 @@ router.post("/", protect, async (req, res) => {
   }
 });
 
-/* ============================================================
-    📊 HISTORY (Fetch Today's Log)
-    GET /api/foods/today
-   ============================================================ */
+/*GET /api/foods/today*/
 router.get("/today", protect, async (req, res) => {
   try {
     const today = new Date().toISOString().split("T")[0];
@@ -97,10 +86,7 @@ router.get("/today", protect, async (req, res) => {
   }
 });
 
-/* ============================================================
-    🗑️ DELETE
-    DELETE /api/foods/:id
-   ============================================================ */
+/*DELETE /api/foods/:id*/
 router.delete("/:id", protect, async (req, res) => {
   try {
     const food = await Food.findById(req.params.id);
