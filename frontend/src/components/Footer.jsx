@@ -13,22 +13,6 @@ const Footer = () => {
               Your ultimate companion for tracking nutrition, hitting goals, and
               staying disciplined. Built for those who crave progress.
             </p>
-            {/* Social Icons Section in Footer.jsx */}
-            {/* Updated Social Icons Section in Footer.jsx */}
-            <div className="d-flex gap-4 mt-3">
-              <a href="your-instagram-link" className="social-icon">
-                <i className="bi bi-instagram"></i>
-              </a>
-              <a href="your-github-link" className="social-icon">
-                <i className="bi bi-github"></i>
-              </a>
-              <a href="your-linkedin-link" className="social-icon">
-                <i className="bi bi-linkedin"></i>
-              </a>
-              <a href="your-x-link" className="social-icon">
-                <i className="bi bi-twitter-x"></i>
-              </a>
-            </div>
           </div>
 
           {/* Quick Links */}
