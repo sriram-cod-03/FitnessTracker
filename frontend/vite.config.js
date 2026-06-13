@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   build: {
+    // Drops all dead weight, console lines, and comments from production scripts
     minify: 'terser',
     terserOptions: {
       compress: {
@@ -16,7 +17,7 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            // Isolates heavy framework pieces so they don't load sequentially
+            // Isolates heavy framework pieces so they don't block the initial paint execution pass
             if (id.includes('react-router')) return 'vendor-router';
             if (id.includes('react')) return 'vendor-react';
             if (id.includes('bootstrap')) return 'vendor-bootstrap';
