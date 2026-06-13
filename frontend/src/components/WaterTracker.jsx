@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
-import "../styles/waterTracker.css";
+import "../styles/progress.css";
 
 const WaterTracker = () => {
   const WATER_GOAL = 3000; // ml
@@ -49,25 +49,24 @@ const WaterTracker = () => {
     return (
       <div className="water-card loading">
         <div className="spinner"></div>
-        <p>Loading water tracker...</p>
+        <p className="mt-2 text-info">Loading trackers...</p>
       </div>
     );
   }
 
   return (
     <div className="water-card">
-      <h3>💧 Water & 🚶 Steps</h3>
+      <h3 className="fw-bold">💧 Water & 🚶 Steps</h3>
 
-      {/* WATER */}
+      {/* WATER SECTION */}
       <div className="tracker-section">
         <div className="tracker-header">
           <span>Water Intake</span>
-          <span>{water} / {WATER_GOAL} ml</span>
+          <span className="fw-bold" style={{ color: "#00ffcc" }}>{water} / {WATER_GOAL} ml</span>
         </div>
-
-        <div className="progress-bar">
+        <div className="tracker-progress-container">
           <div
-            className="progress-fill water"
+            className="tracker-progress-fill water"
             style={{ width: `${Math.min((water / WATER_GOAL) * 100, 100)}%` }}
           />
         </div>
@@ -79,16 +78,16 @@ const WaterTracker = () => {
         </div>
       </div>
 
-      {/* STEPS */}
+      {/* STEPS SECTION */}
       <div className="tracker-section">
         <div className="tracker-header">
-          <span>Steps</span>
-          <span>{steps} / {STEP_GOAL}</span>
+          <span>Steps Walked</span>
+          <span className="fw-bold" style={{ color: "#ffcc00" }}>{steps} / {STEP_GOAL}</span>
         </div>
 
-        <div className="progress-bar">
+        <div className="tracker-progress-container">
           <div
-            className="progress-fill steps"
+            className="tracker-progress-fill steps"
             style={{ width: `${Math.min((steps / STEP_GOAL) * 100, 100)}%` }}
           />
         </div>
@@ -97,7 +96,7 @@ const WaterTracker = () => {
           type="number"
           className="steps-input"
           placeholder="Enter steps"
-          value={steps}
+          value={steps === 0 ? "" : steps} // Clears zero out for easier entry typing
           onChange={(e) => updateSteps(Number(e.target.value))}
         />
       </div>
