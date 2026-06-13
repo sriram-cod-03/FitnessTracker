@@ -2,10 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/src/assets/fitness-app.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fitness Tracker</title>
-
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link 
       rel="preload" 
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/fonts/bootstrap-icons.woff2" 
@@ -13,11 +14,14 @@
       type="font/woff2" 
       crossorigin="anonymous" 
     />
-    
     <style>
       @font-face {
         font-family: 'bootstrap-icons';
         src: url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/fonts/bootstrap-icons.woff2') format('woff2');
+        font-display: swap !important; /* Forces layout tracking to draw instantly */
+      }
+
+      html, body, button, input, select, textarea, [class^="bi-"], [class*=" bi-"] {
         font-display: swap !important;
       }
     </style>
