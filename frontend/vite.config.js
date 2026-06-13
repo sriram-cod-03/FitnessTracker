@@ -1,10 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import externalGlobals from 'rollup-plugin-external-globals';
 
 export default defineConfig({
   plugins: [react()],
   build: {
+    // Keep Terser active to drop your console logs and compress chunks safely
     minify: 'terser',
     terserOptions: {
       compress: {
@@ -14,27 +14,20 @@ export default defineConfig({
       }
     },
     rollupOptions: {
-      // Tells the compiler to look for React globally rather than compiling it into vendor-react.js
-      external: [
-        'react', 
-        'react-dom',
-        /bootstrap-icons\/font\/fonts\/bootstrap-icons\.woff2/
-      ],
-      plugins: [
-        externalGlobals({
-          react: 'React',
-          'react-dom': 'ReactDOM'
-        })
-      ],
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
+            // Isolating framework pieces cleanly fixes the internal variable mapping crashes
             if (id.includes('react-router')) return 'vendor-router';
+            if (id.includes('react')) return 'vendor-react';
             if (id.includes('bootstrap')) return 'vendor-bootstrap';
             return 'vendor-libs';
           }
         }
-      }
+      },
+      external: [
+        /bootstrap-icons\/font\/fonts\/bootstrap-icons\.woff2/
+      ]
     },
     chunkSizeWarningLimit: 600,
   }
