@@ -7,7 +7,6 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          // Put node_modules dependencies into a vendor chunk
           if (id.includes('node_modules')) {
             if (id.includes('react')) return 'vendor-react';
             if (id.includes('bootstrap')) return 'vendor-bootstrap';
@@ -15,7 +14,10 @@ export default defineConfig({
           }
         },
       },
+      external: [
+        /bootstrap-icons\/font\/fonts\/bootstrap-icons\.woff2/
+      ]
     },
-    chunkSizeWarningLimit: 600, // Slightly increase threshold for styles
+    chunkSizeWarningLimit: 600,
   },
 });
